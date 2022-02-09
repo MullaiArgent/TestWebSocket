@@ -3,8 +3,18 @@ package models;
 public class RecentChatModel {
     private int id;
     private String name;
-    private boolean active;
+    private boolean active = false;
     private String profile;
+
+    @Override
+    public String toString() {
+        return "RecentChatModel{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", active=" + active +
+                ", profile='" + profile + '\'' +
+                '}';
+    }
 
     public int getId() {
         return id;

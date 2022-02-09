@@ -6,13 +6,15 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebServlet(value = "/app")
 public class AppController extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-        System.out.println(req.getRemoteUser() + " from the server");
+        HttpSession session = req.getSession();
+        session.setAttribute("userId",req.getRemoteUser());
         RequestDispatcher rd = req.getRequestDispatcher("index.html");
         rd.forward(req, res);
     }
