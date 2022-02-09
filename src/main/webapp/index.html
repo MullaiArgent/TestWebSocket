@@ -1,4 +1,7 @@
 <html lang="html">
+<head><base target="_parent"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&amp;display=swap"><link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/bootstrap.min.css"><link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/mdb.min.css"><link rel="stylesheet" href="https://mdbootstrap.com/wp-content/themes/mdbootstrap4/docs-app/css/compiled-addons-4.20.0.min.css"><link rel="stylesheet" type="text/css" href="https://mdbootstrap.com/wp-content/themes/mdbootstrap4/css/mdb-plugins-gathered.min.css"><style></style><style type="text/css">/* Chart.js */
+@-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}</style>
+    <title>TITLE</title></head>
 <body data-new-gr-c-s-check-loaded="14.1047.0" data-gr-ext-installed="">
 <div id="snippetContent">
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
@@ -16,20 +19,22 @@
             <div class="col-lg-12">
                 <div class="card chat-app">
                     <div id="recentChatList" class="people-list">
-                            <!-- Notification Count -->
-                        <span class="fa-stack fa-2x">
+
+                        <span class="fa-stack fa-2x" onclick="viewNotification()">
                               <i class="fa fa-circle fa-stack-2x"></i>
                               <i class="fa fa-bell fa-stack-1x fa-inverse"></i>
-                              <span class="badge" id="badge"></span>
+                              <span class="badge" id="badge"></span>  <!-- Notification Count -->
                         </span>
 
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">
-                                    <i class="fa fa-search"></i>
+                                    <i class="fas fa-user-plus" onclick="addFriend()"></i>
                                 </span>
                             </div>
-                            <input type="text" class="form-control" placeholder="Search...">
+                            <label>
+                                <input type="text" id="addFriend" class="form-control" placeholder="Search...">
+                            </label>  <!--Search results-->
                         </div>
 
                     <ul id="recentChatsUl" class="list-unstyled chat-list mt-2 mb-0">
@@ -81,19 +86,30 @@
         </div>
     </div>
 </div>
+
+<div id="overlay" onclick="overlayOff()">
+    <div id="fb">
+        <div id="fb-top">
+            <p><b id="popWindowType"></b></p>
+        </div>
+        <div id="forProfile"></div>
+        <p><b id="popWindowFriendName"></b><br></p>
+        <div id="button-block">
+            <div id="popWindowButton"></div>
+        </div>
+    </div>
+</div>
 </body>
-
-
 <style type="text/css">
     body{
     background-color: #f4f7f6;
     margin-top:20px;
 }
-    .badge{
-        position: relative;
-        margin-left: 60%;
-        margin-top: -10%;
-    }
+.badge{
+    position: relative;
+    margin-left: 60%;
+    margin-top: -10%;
+}
 .card {
     background: #fff;
     transition: .5s;
@@ -104,7 +120,118 @@
     width: 100%;
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 10%);
 }
-.chat-app .people-list {
+    #fb{
+        width:500px;
+        border:1px solid gray;
+        border-radius:5px;
+        height:175px;
+        background:white;
+        position: absolute;
+        top:300;
+        bottom: 0;
+        left: 550;
+        right: 0;
+    }
+    #fb p{
+        font-family:sans-serif;
+        margin: 0 0 0 10px;
+        line-height:30px;
+    }
+
+    #fb-top span{
+        color:#4267B2;
+        float:right;
+        margin-right:10px;
+    }
+    #fb-top{
+        background-color:#efefef;
+        height:30px;
+        width:500px;
+        border-radius:5px 5px 0 0;
+        position:absolute;
+        top:-1px;
+        left:-1px;
+        border:1px solid gray;
+    }
+
+    #fb img{
+        position:absolute;
+        left:10px;
+        top:53px;
+    }
+
+    #info{
+        position:absolute;
+        left:120px;
+        top:75px;
+    }
+
+    #info {
+        color:#4267B2;
+        line-height:25px;
+        font-size:18px;
+    }
+
+    #info span{
+        color:#777;
+        font-size:14px;
+    }
+
+    #button-block{
+        position:absolute;
+        right:10px;
+        top:85px;
+    }
+
+    #button-block div{
+        display:inline-block;
+    }
+
+    #popWindowButton, #delete{
+        background-color:#4267B2;
+        color:white;
+        padding:7px;
+        border-radius:2px;
+        margin-right:10px;
+        font-family:sans-serif;
+    }
+
+    #delete{
+        color:#222;
+        background-color:#bbb;
+        border:1px solid #999;
+        padding:6px;
+        margin-right:0;
+    }
+
+    #button-block div:hover{
+        opacity:.8;
+        cursor:pointer;
+    }
+    #overlay {
+        position : absolute;
+        display: none;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2;
+        cursor: pointer;
+    }
+
+    #text{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-size: 50px;
+        color: white;
+        transform: translate(-50%,-50%);
+        -ms-transform: translate(-50%,-50%);
+    }
+    .chat-app .people-list {
     width: 280px;
     position: absolute;
     left: 0;
@@ -225,14 +352,13 @@
 .chat .chat-history .message:after {
     bottom: 100%;
     left: 7%;
-    border: solid transparent;
     content: " ";
     height: 0;
     width: 0;
     position: absolute;
     pointer-events: none;
+    border: 10px solid transparent;
     border-bottom-color: #fff;
-    border-width: 10px;
     margin-left: -10px
 }
 
@@ -243,14 +369,13 @@
 .chat .chat-history .my-message:after {
     bottom: 100%;
     left: 30px;
-    border: solid transparent;
     content: " ";
     height: 0;
     width: 0;
     position: absolute;
     pointer-events: none;
+    border: 10px solid transparent;
     border-bottom-color: #efefef;
-    border-width: 10px;
     margin-left: -10px
 }
 

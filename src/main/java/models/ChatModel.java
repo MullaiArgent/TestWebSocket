@@ -6,6 +6,14 @@ public class ChatModel {
     private String from;
     private String time;
 
+    @Override
+    public String toString() {
+        return "ChatModel{" +
+                "data='" + data + '\'' +
+                ", from='" + from + '\'' +
+                ", time='" + time + '\'' +
+                '}';
+    }
 
     public String getData() {
         return data;

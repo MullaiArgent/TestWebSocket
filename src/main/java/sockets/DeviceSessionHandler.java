@@ -2,11 +2,8 @@ package sockets;
 
 import datamanagement.JDBC;
 import models.ChatModel;
-import models.Device;
 import models.RecentChatModel;
-
 import javax.enterprise.context.ApplicationScoped;
-import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.spi.JsonProvider;
 import javax.websocket.Session;
@@ -22,17 +19,13 @@ import java.util.logging.Logger;
 @ApplicationScoped
 public class DeviceSessionHandler {
 
-    public DeviceSessionHandler() {}
-
-    private int deviceId = 0;
     private int recentChatModelId = 0;
-    private static final HashMap<String, Session> sessions = new HashMap<String, Session>();
-    private static final Set<Device> devices = new HashSet<>();
+    private static final HashMap<String, Session> sessions = new HashMap<>();
     JDBC db = new JDBC();
 
     public void addSession(Session session, String userId) throws SQLException, ClassNotFoundException {
         sessions.put(userId, session);
-        final Set<RecentChatModel> recentChatModels = createRecentChatModels(userId);
+        final List<RecentChatModel> recentChatModels = createRecentChatModels(userId);
         for (RecentChatModel recentChatModel : recentChatModels){
             JsonObject addMessage = createAddRecentChatMessage(recentChatModel);
             sendToSession(session, addMessage);
@@ -52,7 +45,6 @@ public class DeviceSessionHandler {
     }
 
     private JsonObject createAddNotificationCount(int notificationCount) {
-        System.out.println("Json for notifi" + notificationCount);
         JsonProvider provider = JsonProvider.provider();
         JsonObject addMessage = provider.createObjectBuilder()
                 .add("action", "notificationCount")
@@ -61,8 +53,8 @@ public class DeviceSessionHandler {
         return addMessage;
     }
 
-    private HashSet<RecentChatModel> createRecentChatModels(String userId) throws SQLException, ClassNotFoundException {
-        final HashSet<RecentChatModel> recentChatModels = new HashSet<>();
+    private List<RecentChatModel> createRecentChatModels(String userId) throws SQLException, ClassNotFoundException {
+        final List<RecentChatModel> recentChatModels = new ArrayList<>();
         ResultSet friendListResultSet = db.dql("SELECT \"FRIENDS\" FROM public.\"USERS\" WHERE \"ID\"='" + userId + "' ");
         while (friendListResultSet.next()){
             Array friends;
@@ -99,7 +91,7 @@ public class DeviceSessionHandler {
     }
 
     public void addChatModels(String userId, String friendId, Session session) throws SQLException, ClassNotFoundException {
-        final Set<ChatModel> chatModels = createChatModels(userId, friendId);
+        final List<ChatModel> chatModels = createChatModels(userId, friendId);
         for (ChatModel chatModel : chatModels){
             JsonObject addMessage = createAddChatMessage(chatModel);
             sendToSession(session, addMessage);
@@ -114,21 +106,23 @@ public class DeviceSessionHandler {
         return chatModel;
     }
 
-    private HashSet<ChatModel> createChatModels(String userId, String friendId) throws SQLException, ClassNotFoundException {
-        HashSet<ChatModel> chatModels = new HashSet<>();
+    private List<ChatModel> createChatModels(String userId, String friendId) throws SQLException, ClassNotFoundException {
+        List<ChatModel> chatModels = new ArrayList<>();
         ResultSet chatModelsResultSet = db.dql("SELECT * FROM \"MESSAGES\" WHERE ((\"FROM\"='"+ userId +"' OR \"FROM\"='"+ friendId +"') AND (\"TO\"='"+ friendId +"' OR \"TO\"='"+ userId +"'));"); // chat data
         // SELECT * FROM public."MESSAGES" WHERE (("FROM"='BRUCE' OR "FROM"='ALICE') AND ("TO"='BRUCE' OR "TO"='ALICE'));
         while (chatModelsResultSet.next()){
             String data = chatModelsResultSet.getString(4);
+            System.out.println(data);
             String from;
             if (chatModelsResultSet.getString(1).equals(userId)){
                 from = "you";
             }else{
                 from = "friend";
             }
-            String time = chatModelsResultSet.getString(3).substring(0,5);
+            String time = chatModelsResultSet.getString(3);
             chatModels.add(createChatModel(data, from, time));
         }
+        System.out.println();
         return chatModels;
     }
 
@@ -153,82 +147,122 @@ public class DeviceSessionHandler {
     }
 
     public void removeSession(Session session){
-        System.out.println("the session is to be removed");
+        System.out.println("the session is being removed");
         sessions.entrySet().removeIf(entry -> session.equals(entry.getValue()));
     }
 
-    public JsonObject createAddMessage(Device device){
+    public void sendMessage(String userId, JsonObject jsonObject){
+        String friendId = jsonObject.getString("friendId");
+        String message = jsonObject.getString("message");
+        String time = jsonObject.getString("time");
+        try {
+            db.dml("INSERT INTO \"MESSAGES\" VALUES ('"+ userId +"','"+ friendId +"','"+time+"','" + message + "','chat');");
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+        JsonObject addMessage1 = createAddChatMessage(createChatModel(message,"you",time));
+        sendToSession(sessions.get(userId),addMessage1);
+        try {
+            JsonObject addMessage2 = createAddChatMessage(createChatModel(message, "friend", time));
+            sendToSession(sessions.get(friendId), addMessage2);
+        }catch (NullPointerException e){
+            System.out.println(friendId + "is Offline");
+        }
+    }
+
+    public void addFriendWindow(String userId, JsonObject jsonObject, Session session) throws SQLException, ClassNotFoundException {
+        String friendId = jsonObject.getString("friendId");
+        ResultSet addFriendResultSet = db.dql("SELECT \"ID\",\"PROFILEPIC\" FROM public.\"USERS\"");
+        while (addFriendResultSet.next()){
+            if (addFriendResultSet.getString(1).equals(friendId)){
+                String profile = addFriendResultSet.getString(2);
+                ResultSet friendListResultSet = db.dql("SELECT \"FRIENDS\" FROM public.\"USERS\" WHERE \"ID\"='" + userId + "' ");
+                while (friendListResultSet.next()){
+                    Array friends;
+                    String[] friendsArray = new String[0];
+                    if (!friendListResultSet.getString(1).equals("{}")){
+                        friends = friendListResultSet.getArray(1);
+                        friendsArray = (String[])friends.getArray();
+                    }else {
+                        JsonObject addMessage = createFriendRequestWindowMessage(friendId, profile);
+                        sendToSession(session, addMessage); // has no friend, fd reqing
+                        return;
+                    }
+                    for (String friend : friendsArray) {
+                        if (friendId.equals(friend)){
+                            // are fds, chat window
+                            JsonObject addMessage = createAlreadyAFriendWindowMessage(friendId, profile);
+                            sendToSession(session, addMessage);
+                            return;
+                        }
+                    }
+                }
+                JsonObject addMessage = createFriendRequestWindowMessage(friendId, profile);
+                sendToSession(session, addMessage); // not a friend, but a user so sends a req
+                return;
+            }
+        }
+        // user does not exist, send Invitation
+        ResultSet invitationResultSet = db.dql("SELECT * FROM public.\"NOTIFICATION\" where \"RECIPIENT_ID\" = '"+friendId+"' and \"SENDER_ID\" ='"+userId+"';");
+        System.out.println("from " + userId + " to " + friendId);
+        while (invitationResultSet.next()){
+            System.out.println("inside the notification query");
+            sendToSession(session, createAlreadyInvitedWindowMessage(friendId));
+            return;
+        }
+        JsonObject addMessage = createInvitationWindowMessage(friendId);
+        sendToSession(session, addMessage);
+    }
+
+    public JsonObject createAlreadyAFriendWindowMessage(String friendId, String profile){
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject message = provider.createObjectBuilder()
+                .add("action","chatWindow")
+                .add("friendId",friendId)
+                .add("profile", profile)
+                .build();
+        return message;
+    }
+
+    public JsonObject createFriendRequestWindowMessage(String friendId, String profile){
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject message = provider.createObjectBuilder()
+                .add("action","addFriendWindow")
+                .add("friendId",friendId)
+                .add("profile",profile)
+                .build();
+        return message;
+    }
+
+    public JsonObject createInvitationWindowMessage(String friendId){
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject message = provider.createObjectBuilder()
+                .add("action","invitationWindow")
+                .add("friendId",friendId)
+                .build();
+        return message;
+    }
+
+    public JsonObject createAlreadyInvitedWindowMessage(String friendId){
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject message = provider.createObjectBuilder()
+                .add("action","alreadyInvited")
+                .add("friendId",friendId)
+                .build();
+        return message;
+    }
+
+    public void sendFriendRequest(String userId, String friendId) {
+        try {
+            db.dml("insert into public.\"NOTIFICATION\" values('"+ friendId +"','"+ userId +"','friend_request',now(),FALSE);");
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
         JsonProvider provider = JsonProvider.provider();
         JsonObject addMessage = provider.createObjectBuilder()
-                .add("action","add")
-                .add("id",device.getId())
-                .add("name",device.getName())
-                .add("type",device.getType())
-                .add("status",device.getStatus())
-                .add("description",device.getDescription())
+                .add("action","newNotification")
+                .add("from", userId)
                 .build();
-        return addMessage;
-    }
-
-    public void addDevice(Device device){
-        device.setId(deviceId);
-        devices.add(device);
-        deviceId++;
-        JsonObject addMessage = createAddMessage(device);
-        sendToAllConnectedSession(addMessage);
-    }
-
-    public void removeDevice(int id){
-        Device device = getDeviceById(id);
-        if(device != null){
-            devices.remove(device);
-            JsonProvider provider = JsonProvider.provider();
-            JsonObject removeMessage =  provider.createObjectBuilder()
-                    .add("action","remove")
-                    .add("id",id)
-                    .build();
-            sendToAllConnectedSession(removeMessage);
-        }
-    }
-
-    public void toggleDevice(int id){
-        JsonProvider provider = JsonProvider.provider();
-        Device device = getDeviceById(id);
-        if (device != null){
-            if ("On".equals(device.getStatus())){
-                device.setStatus("Off");
-            } else {
-                device.setStatus("On");
-            }
-            JsonObject updateDevMessage = provider.createObjectBuilder()
-                    .add("action","toggle")
-                    .add("id",device.getId())
-                    .add("status", device.getStatus())
-                    .build();
-            sendToAllConnectedSession(updateDevMessage);
-        }
-    }
-
-    public Device getDeviceById(int id){
-        for (Device device : devices){
-            if (device.getId() == id){
-                return device;
-            }
-        }
-        return null;
-    }
-
-    public void sendToAllConnectedSession(JsonObject message){
-        for (Map.Entry<String, Session> session : sessions.entrySet()){
-            sendToSession(session.getValue(), message);
-        }
-    }
-
-    public void sendMessage(String userId, JsonObject jsonObject){
-
-        JsonObject addMessage1 = createAddChatMessage(createChatModel(jsonObject.getString("message"),"you",jsonObject.getString("time")));
-        sendToSession(sessions.get(userId),addMessage1);
-        JsonObject addMessage2 = createAddChatMessage(createChatModel(jsonObject.getString("message"),"friend",jsonObject.getString("time")));
-        sendToSession(sessions.get(jsonObject.getString("friendId")),addMessage2);
+        sendToSession(sessions.get(friendId),addMessage);
     }
 }

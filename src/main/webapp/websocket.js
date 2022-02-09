@@ -72,7 +72,6 @@ function removeChat(){
     const chatList = document.getElementById("chatList")
     chatList.innerHTML = "";
 }
-
 function onMessage(event){
     const message = JSON.parse(event.data);
     if (message.action === "addRecentChatModel"){
@@ -85,11 +84,111 @@ function onMessage(event){
         const Count = document.getElementById("badge");
         Count.innerHTML = message.notificationCount;
     }
-    // All message from the DeviceWebSocketServer will be process here
+    if (message.action === "addFriendWindow"){
+        const windowType = document.getElementById("forProfile");
+
+        const profile = document.createElement("img");
+        profile.setAttribute("src",message.profile);
+        profile.setAttribute("height","100");
+        profile.setAttribute("width","100");
+
+        windowType.appendChild(profile);
+
+        const popWindowType = document.getElementById("popWindowType");
+        popWindowType.innerHTML = "Send Friend Request";
+
+        const popWindowFriendName = document.getElementById("popWindowFriendName");
+        popWindowFriendName.innerHTML = message.friendId;
+
+        const popWindowButton = document.getElementById("popWindowButton");
+        popWindowButton.innerHTML = "Add Friend"
+        popWindowButton.onclick = function () {
+            sendFriendRequest(message.friendId);
+            overlayOff();
+            console.log("add friend request to "+ message.friendId)
+        }
+        overlayOn();
+    }
+    if (message.action === "invitationWindow"){
+        const windowType = document.getElementById("forProfile");
+
+        const profile = document.createElement("img");
+        profile.setAttribute("src", "https://tinyurl.com/2p8hr77v");
+        profile.setAttribute("height","100");
+        profile.setAttribute("width","100");
+
+        windowType.appendChild(profile);
+
+        const popWindowType = document.getElementById("popWindowType");
+        popWindowType.innerHTML = "Send Invitation";
+
+        const popWindowFriendName = document.getElementById("popWindowFriendName");
+        popWindowFriendName.innerHTML = message.friendId;
+
+        const popWindowButton = document.getElementById("popWindowButton");
+        popWindowButton.innerHTML = "Invite"
+        popWindowButton.onclick = function () {
+            sendInvitation(message.friendId);
+            console.log("Invitation to "+ message.friendId);
+            overlayOff();
+        }
+        overlayOn();
+    }
+    if (message.action === "chatWindow"){
+        const windowType = document.getElementById("forProfile");
+
+        const profile = document.createElement("img");
+        profile.setAttribute("src",message.profile);
+        profile.setAttribute("height","100");
+        profile.setAttribute("width","100");
+
+        windowType.appendChild(profile);
+
+        const popWindowType = document.getElementById("popWindowType");
+        popWindowType.innerHTML = "Already a Friend";
+
+        const popWindowFriendName = document.getElementById("popWindowFriendName");
+        popWindowFriendName.innerHTML = message.friendId;
+
+        const popWindowButton = document.getElementById("popWindowButton");
+        popWindowButton.innerHTML = "Chat"
+        popWindowButton.onclick = function (){
+            viewChat(message.friendId);
+            overlayOff();
+        }
+        overlayOn();
+    }
+    if (message.action === "alreadyInvited"){
+        const windowType = document.getElementById("forProfile");
+
+        const profile = document.createElement("img");
+        profile.setAttribute("src", "https://tinyurl.com/35zst7ft");
+        profile.setAttribute("height","100");
+        profile.setAttribute("width","100");
+
+        windowType.appendChild(profile);
+
+        const popWindowType = document.getElementById("popWindowType");
+        popWindowType.innerHTML = "Already Invited";
+
+        const popWindowFriendName = document.getElementById("popWindowFriendName");
+        popWindowFriendName.innerHTML = message.friendId;
+
+        const popWindowButton = document.getElementById("popWindowButton");
+        popWindowButton.innerHTML = "Close"
+        popWindowButton.onclick = function () {
+            overlayOff();
+        }
+        overlayOn();
+    }
+    if (message.action === "newNotification"){
+        const badge = document.getElementById("badge");
+        badge.innerHTML = parseInt(badge.innerHTML) + 1;
+    }
+    if (message.action === ""){
+
+    }
 }
-
-
-
 function viewChat(friendId){
     globalFriendId = friendId;
     const ChatAction = {
@@ -102,35 +201,40 @@ function viewChat(friendId){
     }
     socket.send(JSON.stringify(ChatAction));
 }
-
 function sendMessage(){
     const message = document.getElementById("messageToSend").value;
     document.getElementById("messageToSend").value = "";
     const date = new Date();
+    if (globalFriendId !== ""){
+        const ChatAction = {
+            action: "sendMessage",
+            friendId: globalFriendId,
+            message: message + "",
+            time : "" + date.getHours() + ":" + date.getMinutes()
+        };
+        socket.send(JSON.stringify(ChatAction));
+    }
+}
+function sendFriendRequest(friendId){
     const ChatAction = {
-        action: "sendMessage",
-        friendId: globalFriendId,
-        message: message + "",
-        time : "" + date.getHours() + ":" + date.getMinutes()
+        action: "friendRequest",
+        friendId: friendId
     };
     socket.send(JSON.stringify(ChatAction));
 }
-
+function sendInvitation(friendId){
+    const ChatAction = {
+        action: "invitation",
+        friendId: friendId
+    };
+    socket.send(JSON.stringify(ChatAction));
+}
 function viewNotification(){
-    var ChatAction = {
-        action : "viewNotification"
+    const ChatAction = {
+        action: "viewNotification"
     };
     socket.send(JSON.stringify(ChatAction));
 }
-
-function friendRequest(){
-    var ChatAction  = {
-        action : "friendRequest",
-        friendId : ""
-    };                                   // TODO pop up the invitation or request
-    socket.send(JSON.stringify(ChatAction));
-}
-
 function confirmFriendRequest(){
     var ChatAction = {
         action : "confirmFriendRequest",
@@ -138,13 +242,27 @@ function confirmFriendRequest(){
     };
     socket.send(JSON.stringify(ChatAction));
 }
-
 function declineFriendRequest(){
-    var ChatAction = {
-        action : "declineFriendRequest",
-        friendId : ""
+    const ChatAction = {
+        action: "declineFriendRequest",
+        friendId: ""
     };
     socket.send(JSON.stringify(ChatAction));
 }
-
-
+function overlayOn() {
+    document.getElementById("overlay").style.display = "block";
+}
+function overlayOff() {
+    document.getElementById("overlay").style.display = "none";
+    const popWindowProfile = document.getElementById("forProfile");
+    popWindowProfile.innerHTML = "";
+}
+function addFriend(){
+    const friendId = document.getElementById("addFriend").value;
+    document.getElementById("addFriend").value = "";
+    const ChatAction ={
+        action : "addFriend",
+        friendId : friendId
+    };
+    socket.send(JSON.stringify(ChatAction));
+}

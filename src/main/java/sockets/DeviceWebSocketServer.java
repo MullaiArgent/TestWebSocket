@@ -1,6 +1,6 @@
 package sockets;
 
-import models.Device;
+import datamanagement.InvitationMailer;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.json.Json;
@@ -39,25 +39,26 @@ public class DeviceWebSocketServer {
     public void handleMessage(String message, Session session){
         try(JsonReader reader = Json.createReader(new StringReader(message))){
             JsonObject jsonObject = reader.readObject();
-            if ("add".equals(jsonObject.getString("action"))){
-                Device device = new Device();
-                device.setName(jsonObject.getString("name"));
-                device.setDescription(jsonObject.getString("description"));
-                System.out.println(jsonObject.getString("description") + "  description from the front end");
-                device.setType(jsonObject.getString("type"));
-                device.setStatus("Off");
-                sessionHandler.addDevice(device);
-            }
             if ("viewChat".equals(jsonObject.getString("action"))){
                     sessionHandler.addChatModels(userId, jsonObject.getString("friendId"), session);
             }
             if ("sendMessage".equals(jsonObject.getString("action"))){
                     sessionHandler.sendMessage(userId, jsonObject);
             }
-            if ("viewNotification".equals(jsonObject.getString("action"))){}
-            if ("friendRequest".equals(jsonObject.getString("action"))){}
-            if ("confirmFriendRequest".equals(jsonObject.getString("action"))){}
+            if ("addFriend".equals(jsonObject.getString("action"))){
+                    sessionHandler.addFriendWindow(userId, jsonObject, session);
+            }
+            if ("friendRequest".equals(jsonObject.getString("action"))){
+                    sessionHandler.sendFriendRequest(userId, jsonObject.getString("friendId"));
+            }
+            if ("invitation".equals(jsonObject.getString("action"))){
+                new InvitationMailer().mailer(userId, jsonObject.getString("friendId"));
+            }
+            if ("viewNotification".equals(jsonObject.getString("action"))){
+
+            }
             if ("declineFriendRequest".equals(jsonObject.getString("action"))){}
+            if ("confirmFriendRequest".equals(jsonObject.getString("action"))){}
 
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
