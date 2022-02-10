@@ -17,6 +17,7 @@ function printRecentChats(recentChat){
 
     const avatar = document.createElement("img");
     avatar.setAttribute("src","" + recentChat.profile);
+    avatar.setAttribute("id","avatar"+recentChat.name);
     avatar.setAttribute("alt",recentChat.name)
     clearfix.appendChild(avatar);
 
@@ -269,7 +270,26 @@ function onMessage(event) {
         removeNotification(message);
     }
 }
+function removeLabel(){
+    const chatAbout = document.getElementById("about");
+    chatAbout.innerHTML = ""
+}
+function applyTheLabel(friendId){
+    removeLabel();
+    const chatAbout = document.getElementById("about");
+
+    const avatar = document.getElementById("avatar"+friendId);
+    const clone = avatar.cloneNode(false);
+    document.getElementById("about").appendChild(clone);
+    const chatAbout1 = document.createElement("div");
+    chatAbout1.setAttribute("class","chat-about");
+    const name = document.createElement("h6");
+    name.setAttribute("class","m-b-0");
+    name.innerHTML = friendId;
+    chatAbout.appendChild(name);
+}
 function viewChat(friendId) {
+    applyTheLabel(friendId);
     globalFriendId = friendId;
     const ChatAction = {
         action: "viewChat",
@@ -355,6 +375,3 @@ function overlayOff() {
     const popWindowProfile = document.getElementById("forProfile");
     popWindowProfile.innerHTML = "";
 }
-
-
-
