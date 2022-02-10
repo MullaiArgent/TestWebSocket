@@ -68,29 +68,107 @@ function printChat(chat){
         chatIl.appendChild(chatData);
     }
 }
+function printNotification(message) {
+    const n = document.getElementById("notificationDrop");
+
+    const notificationList = document.createElement("div");
+    notificationList.setAttribute("class", "noty-manager-list-item noty-manager-list-item-error");
+    n.appendChild(notificationList)
+
+    const activityItem = document.createElement("div");
+    activityItem.setAttribute("class", "activity-item");
+    notificationList.setAttribute("id", message.receiver);
+    notificationList.appendChild(activityItem);
+
+    const activity = document.createElement("div");
+    activity.setAttribute("class", "activity");
+
+    if (message.activity === "friendRequestSent") {
+        activity.innerHTML = "Friend Request Sent to ";
+        activityItem.appendChild(activity);
+        const a = document.createElement("a");
+        a.innerHTML = message.receiver;
+        activity.appendChild(a);
+
+        const cancelRequest = document.createElement("button");
+        cancelRequest.innerHTML = "Cancel Request"
+        cancelRequest.onclick = function () {
+            cancelOutGoingFriendRequest(message.receiver);
+        }
+        activity.appendChild(cancelRequest);
+    }
+    if (message.activity === "friendRequestReceived") {
+        notificationList.setAttribute("id", message.sender);
+        activity.innerHTML = "You Have a Friend Request from ";
+        activityItem.appendChild(activity);
+        const a = document.createElement("a");
+        a.innerHTML = message.sender;
+        activity.appendChild(a);
+
+        const confirm = document.createElement("button");
+        confirm.innerHTML = "Confirm"
+        confirm.onclick = function () {
+            confirmFriendRequest(message.sender);
+        }
+        activity.appendChild(confirm);
+        const decline = document.createElement("button");
+        decline.innerHTML = "Decline"
+        decline.onclick = function () {
+            cancelIncomingFriendRequest(message.sender);
+        }
+        activity.appendChild(decline);
+    }
+    if (message.activity === "invitation") {
+        activity.innerHTML = "Invitation has been sent to ";
+        activityItem.appendChild(activity);
+        const a = document.createElement("a");
+        a.innerHTML = message.receiver;
+        activity.appendChild(a);
+    }
+    if (message.activity === "friends") {
+        activity.innerHTML = "You are now Friends";
+        activityItem.appendChild(activity);
+        const a = document.createElement("a");
+        a.innerHTML = message.receiver;
+        activity.appendChild(a);
+
+        const chat = document.createElement("button");
+        chat.innerHTML = "Chat"
+        chat.onclick = function () {
+            viewChat(message.receiver);
+        }
+        activity.appendChild(chat);
+    }
+}
+function removeNotification(message){
+    console.log("remove the notification" + message.friendId)
+    const node = document.getElementById(message.friendId);
+    console.log("remove the notification" + message.friendId)
+    node.innerHTML = ""
+}
 function removeChat(){
     const chatList = document.getElementById("chatList")
     chatList.innerHTML = "";
 }
-function onMessage(event){
+function onMessage(event) {
     const message = JSON.parse(event.data);
-    if (message.action === "addRecentChatModel"){
+    if (message.action === "addRecentChatModel") {
         printRecentChats(message);
     }
-    if (message.action === "viewChat"){
+    if (message.action === "viewChat") {
         printChat(message);
     }
-    if (message.action === "notificationCount"){
+    if (message.action === "notificationCount") {
         const Count = document.getElementById("badge");
         Count.innerHTML = message.notificationCount;
     }
-    if (message.action === "addFriendWindow"){
+    if (message.action === "addFriendWindow") {
         const windowType = document.getElementById("forProfile");
 
         const profile = document.createElement("img");
-        profile.setAttribute("src",message.profile);
-        profile.setAttribute("height","100");
-        profile.setAttribute("width","100");
+        profile.setAttribute("src", message.profile);
+        profile.setAttribute("height", "100");
+        profile.setAttribute("width", "100");
 
         windowType.appendChild(profile);
 
@@ -105,17 +183,16 @@ function onMessage(event){
         popWindowButton.onclick = function () {
             sendFriendRequest(message.friendId);
             overlayOff();
-            console.log("add friend request to "+ message.friendId)
         }
         overlayOn();
     }
-    if (message.action === "invitationWindow"){
+    if (message.action === "invitationWindow") {
         const windowType = document.getElementById("forProfile");
 
         const profile = document.createElement("img");
         profile.setAttribute("src", "https://tinyurl.com/2p8hr77v");
-        profile.setAttribute("height","100");
-        profile.setAttribute("width","100");
+        profile.setAttribute("height", "100");
+        profile.setAttribute("width", "100");
 
         windowType.appendChild(profile);
 
@@ -129,18 +206,18 @@ function onMessage(event){
         popWindowButton.innerHTML = "Invite"
         popWindowButton.onclick = function () {
             sendInvitation(message.friendId);
-            console.log("Invitation to "+ message.friendId);
+            console.log("Invitation to " + message.friendId);
             overlayOff();
         }
         overlayOn();
     }
-    if (message.action === "chatWindow"){
+    if (message.action === "chatWindow") {
         const windowType = document.getElementById("forProfile");
 
         const profile = document.createElement("img");
-        profile.setAttribute("src",message.profile);
-        profile.setAttribute("height","100");
-        profile.setAttribute("width","100");
+        profile.setAttribute("src", message.profile);
+        profile.setAttribute("height", "100");
+        profile.setAttribute("width", "100");
 
         windowType.appendChild(profile);
 
@@ -152,19 +229,19 @@ function onMessage(event){
 
         const popWindowButton = document.getElementById("popWindowButton");
         popWindowButton.innerHTML = "Chat"
-        popWindowButton.onclick = function (){
+        popWindowButton.onclick = function () {
             viewChat(message.friendId);
             overlayOff();
         }
         overlayOn();
     }
-    if (message.action === "alreadyInvited"){
+    if (message.action === "alreadyInvited") {
         const windowType = document.getElementById("forProfile");
 
         const profile = document.createElement("img");
-        profile.setAttribute("src", "https://tinyurl.com/yztecup8");
-        profile.setAttribute("height","100");
-        profile.setAttribute("width","100");
+        profile.setAttribute("src", "https://tinyurl.com/35zst7ft");
+        profile.setAttribute("height", "100");
+        profile.setAttribute("width", "100");
 
         windowType.appendChild(profile);
 
@@ -181,72 +258,92 @@ function onMessage(event){
         }
         overlayOn();
     }
-    if (message.action === "newNotification"){
+    if (message.action === "newNotification") {
         const badge = document.getElementById("badge");
         badge.innerHTML = parseInt(badge.innerHTML) + 1;
     }
-
-    if (message.action === ""){
-
+    if (message.action === "addNotification") {
+        printNotification(message);
+    }
+    if (message.action === "removeNotification"){
+        removeNotification(message);
     }
 }
-function viewChat(friendId){
+function viewChat(friendId) {
     globalFriendId = friendId;
     const ChatAction = {
         action: "viewChat",
         friendId: friendId
     };
     const ul = document.getElementById("chatList");
-    if (document.contains(ul)){
+    if (document.contains(ul)) {
         removeChat();
     }
     socket.send(JSON.stringify(ChatAction));
 }
-function sendMessage(){
+function sendMessage() {
     const message = document.getElementById("messageToSend").value;
     document.getElementById("messageToSend").value = "";
     const date = new Date();
-    if (globalFriendId !== ""){
+    if (globalFriendId !== "") {
         const ChatAction = {
             action: "sendMessage",
             friendId: globalFriendId,
             message: message + "",
-            time : "" + date.getHours() + ":" + date.getMinutes()
+            time: "" + date.getHours() + ":" + date.getMinutes()
         };
         socket.send(JSON.stringify(ChatAction));
     }
 }
-function sendFriendRequest(friendId){
+function sendFriendRequest(friendId) {
     const ChatAction = {
         action: "friendRequest",
         friendId: friendId
     };
     socket.send(JSON.stringify(ChatAction));
 }
-function sendInvitation(friendId){
+function sendInvitation(friendId) {
     const ChatAction = {
         action: "invitation",
         friendId: friendId
     };
     socket.send(JSON.stringify(ChatAction));
 }
-function viewNotification(){
-    var ChatAction = {
-        action : "viewNotification"
-    };
-    socket.send(JSON.stringify(ChatAction));
-}
-function confirmFriendRequest(){
-    var ChatAction = {
-        action : "confirmFriendRequest",
-        friendId : ""
-    };
-    socket.send(JSON.stringify(ChatAction));
-}
-function declineFriendRequest(){
+function cancelOutGoingFriendRequest(friendId) {
     const ChatAction = {
-        action: "declineFriendRequest",
-        friendId: ""
+        action: "cancelOutGoingFriendRequest",
+        friendId: friendId
+    };
+    const Count = document.getElementById("badge");
+    Count.innerHTML = parseInt(Count.innerHTML) - 1;
+    removeNotification(ChatAction);
+    socket.send(JSON.stringify(ChatAction));
+}
+function cancelIncomingFriendRequest(friendId) {
+    const ChatAction = {
+        action: "cancelIncomingFriendRequest",
+        friendId: friendId
+    };
+    const Count = document.getElementById("badge");
+    Count.innerHTML = parseInt(Count.innerHTML) - 1;
+    removeNotification(ChatAction);
+    socket.send(JSON.stringify(ChatAction));
+}
+function confirmFriendRequest(friendId) {
+    const n = document.getElementById("notificationDrop");
+    n.innerHTML = "";
+    const ChatAction = {
+        action: "confirmFriendRequest",
+        friendId: friendId
+    };
+    socket.send(JSON.stringify(ChatAction));
+}
+function addFriend() {
+    const friendId = document.getElementById("addFriend").value;
+    document.getElementById("addFriend").value = "";
+    const ChatAction = {
+        action: "addFriend",
+        friendId: friendId
     };
     socket.send(JSON.stringify(ChatAction));
 }
@@ -258,12 +355,6 @@ function overlayOff() {
     const popWindowProfile = document.getElementById("forProfile");
     popWindowProfile.innerHTML = "";
 }
-function addFriend(){
-    const friendId = document.getElementById("addFriend").value;
-    document.getElementById("addFriend").value = "";
-    const ChatAction ={
-        action : "addFriend",
-        friendId : friendId
-    };
-    socket.send(JSON.stringify(ChatAction));
-}
+
+
+

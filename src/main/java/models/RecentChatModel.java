@@ -1,7 +1,7 @@
 package models;
 
 public class RecentChatModel {
-    private int id;
+    private int id = 0;
     private String name;
     private boolean active = false;
     private String profile;

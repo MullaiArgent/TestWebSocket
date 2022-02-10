@@ -20,16 +20,51 @@
                 <div class="card chat-app">
                     <div id="recentChatList" class="people-list">
 
-                        <span class="fa-stack fa-2x">
-                              <i class="fa fa-circle fa-stack-2x"></i>
-                              <i class="fa fa-bell fa-stack-1x fa-inverse"></i>
-                              <span class="badge" id="badge"></span>  <!-- Notification Count -->
-                        </span>
+                        <ul class="notificationsbtn nav navbar-nav navbar-right">
+                            <li id="notificationsli">
+
+                                <a id="notifications" href="#" id="drop3" role="button" class="dropdown-toggle" data-toggle="dropdown">
+                                        <span class="fa-stack fa-2x"> <!-- onclick="viewNotification()"-->
+                                            <i class="fas fa-bell fa-2x"></i>
+                                            <span class="badge" id="badge"></span>  <!-- Notification Count -->
+                                        </span></a>
+
+                                <div id="notification-container" class="dropdown-menu" role="menu" aria-labelledby="drop3" style="position: absolute;transform: translate3d(0px, 86px, 0px);top: 0px;left: 0px;will-change: transform;width: fit-content;">
+
+                                    <section class="panel">
+                                        <header class="panel-heading">
+                                            <strong>Notifications</strong>
+                                        </header><div id="notification-list" class="list-group list-group-alt">
+
+                                            <div style="" id="notificationDrop">
+
+                                                <!--     <ul class="noty-manager-list-item noty-manager-list-item-error">
+                                                      <div class="activity-item">
+                                                            <div class="activity">
+                                                                <a>FriendId</a> Sent you friend Request
+                                                                <button >Confirm</button>
+                                                                <button >decline</button>
+                                                                <span>14 minutes ago</span>
+                                                            </div>
+                                                    </div>
+                                                </ul>-->
+
+                                            </div>
+                                    </div>
+                                        <footer class="panel-footer">
+                                            <a class="pull-right"></a>
+                                            <a data-toggle="class:show animated fadeInRight"></a>
+                                        </footer>
+                                    </section>
+
+                                </div>
+                            </li>
+                        </ul>
 
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">
-                                    <i class="fas fa-user-plus" onclick="addFriend()"></i>
+                                    <i class="fas fa-user-plus fa-2x" onclick="addFriend()"></i>
                                 </span>
                             </div>
                             <label>
@@ -72,7 +107,7 @@
                             <div class="input-group mb-0">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">
-                                        <i class="fa fa-send" onclick="sendMessage()"></i>
+                                        <i class="fa fa-send fa-2x" onclick="sendMessage()"></i>
                                     </span>
                                 </div>
                                 <label>
@@ -99,16 +134,151 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+
 </body>
 <style type="text/css">
     body{
     background-color: #f4f7f6;
     margin-top:20px;
 }
+    body {
+        padding-top: 50px;
+        padding-right:100px;
+    }
+
+
+    .starter-template {
+        padding: 40px 15px;
+        text-align: center;
+    }
+
+    a {
+        color: #428bca;
+    }
+
+    a:hover {
+        color: #D65C4F;
+        text-decoration: none;
+    }
+
+    #notification-list {
+        width: 300px;
+        max-height: 400px;
+        overflow-y: scroll;
+    }
+
+    .dropdown-menu > .panel {
+        border: none;
+        margin: 0px 0;
+        width: max-content;
+    }
+
+    .panel-heading {
+        background-color: #f1f1f1;
+        border-bottom: 1px solid #dedede;
+    }
+
+    .activity-item i {
+        float: left;
+        margin-top: 3px;
+        font-size: 16px;
+    }
+
+    div.activity {
+        margin-left: 28px;
+    }
+
+    div.activity-item {
+        padding: 7px 12px;
+    }
+
+    #notification-list div.activity-item {
+        border-top: 1px solid #f5f5f5;
+    }
+
+    #notification-list div.activity-item a {
+        font-weight: 600;
+    }
+
+    div.activity span {
+        display: block;
+        color: #999;
+        font-size: 11px;
+        line-height: 16px;
+    }
+
+    #notifications i.fa {
+        font-size: 17px;
+    }
+
+    .noty_type_error * {
+        font-weight: normal !important;
+    }
+
+    .noty_type_error a {
+        font-weight: bold !important;
+    }
+
+    .noty_bar.noty_type_error a, .noty_bar.noty_type_error i {
+        color: #fff
+    }
+
+    .noty_bar.noty_type_information a {
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .noty_type_error div.activity span
+    {
+        color: #fff
+    }
+
+    .noty_type_information div.activity span
+    {
+        color: #fefefe
+    }
+
+    .no-notification {
+        padding: 10px 5px;
+        text-align: center;
+    }
+
+    .noty-manager-wrapper {
+        position: relative;
+        display: inline-block !important;
+    }
+
+    .noty-manager-bubble
+    {
+        position: absolute;
+        top: -8px;
+        background-color: #fb6b5b;
+        color: #fff;
+        padding: 2px 5px !important;
+        font-size: 9px;
+        line-height: 12px;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        cursor: pointer;
+        height: 15px;
+        font-weight: bold;
+
+        border-radius: 2px;
+        -moz-border-radius: 2px;
+        -webkit-border-radius: 2px;
+        box-shadow:1px 1px 1px rgba(0,0,0,.1);
+        opacity: 0;
+    }
 .badge{
     position: relative;
-    margin-left: 60%;
-    margin-top: -10%;
+    margin-left: -40%;
+    margin-top: -60%;
 }
 .card {
     background: #fff;

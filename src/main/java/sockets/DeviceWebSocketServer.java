@@ -49,16 +49,20 @@ public class DeviceWebSocketServer {
                     sessionHandler.addFriendWindow(userId, jsonObject, session);
             }
             if ("friendRequest".equals(jsonObject.getString("action"))){
-                    sessionHandler.sendFriendRequest(userId, jsonObject.getString("friendId"));
+                    sessionHandler.sendFriendRequest(userId, jsonObject.getString("friendId"), session);
             }
             if ("invitation".equals(jsonObject.getString("action"))){
                 new InvitationMailer().mailer(userId, jsonObject.getString("friendId"));
             }
-            if ("viewNotification".equals(jsonObject.getString("action"))){
-
+            if ("cancelOutGoingFriendRequest".equals(jsonObject.getString("action"))){
+                sessionHandler.cancelOutGoingFriendRequest(userId,jsonObject);
             }
-            if ("declineFriendRequest".equals(jsonObject.getString("action"))){}
-            if ("confirmFriendRequest".equals(jsonObject.getString("action"))){}
+            if ("cancelIncomingFriendRequest".equals(jsonObject.getString("action"))){
+                sessionHandler.cancelIncomingFriendRequest(userId,jsonObject);
+            }
+            if ("confirmFriendRequest".equals(jsonObject.getString("action"))){
+                sessionHandler.confirmFriendRequest(userId, jsonObject.getString("friendId"), session);
+            }
 
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();

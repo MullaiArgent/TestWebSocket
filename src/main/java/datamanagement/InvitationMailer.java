@@ -49,7 +49,7 @@ public class InvitationMailer {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress("mullairajan2000@gmail.com"));
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
-            message.setSubject(sender + " has sent you a Invitation to user this App");
+            message.setSubject(sender + " has sent you a Invitation to Use this App");
             message.setText(invitationUrl);
             return message;
         }catch (Exception ex){
