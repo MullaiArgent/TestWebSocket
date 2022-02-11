@@ -1,54 +1,37 @@
 <html lang="html">
 <head><base target="_parent"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&amp;display=swap"><link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/bootstrap.min.css"><link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/mdb.min.css"><link rel="stylesheet" href="https://mdbootstrap.com/wp-content/themes/mdbootstrap4/docs-app/css/compiled-addons-4.20.0.min.css"><link rel="stylesheet" type="text/css" href="https://mdbootstrap.com/wp-content/themes/mdbootstrap4/css/mdb-plugins-gathered.min.css"><style></style><style type="text/css">/* Chart.js */
 @-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}</style>
-    <title>TITLE</title></head>
+    <title>Chatter</title></head>
 <body data-new-gr-c-s-check-loaded="14.1047.0" data-gr-ext-installed="">
 <div id="snippetContent">
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
-    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+    <link   rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+    <link   href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+    <link   href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js">
     </script>
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="websocket.js"></script>
     <div class="container">
         <div class="row clearfix">
             <div class="col-lg-12">
-                <div class="card chat-app">
+                <div class="card chat-app" style="height: 700px">
                     <div id="recentChatList" class="people-list">
-
                         <ul class="notificationsbtn nav navbar-nav navbar-right">
                             <li id="notificationsli">
-
                                 <a id="notifications" href="#" id="drop3" role="button" class="dropdown-toggle" data-toggle="dropdown">
                                         <span class="fa-stack fa-2x"> <!-- onclick="viewNotification()"-->
                                             <i class="fas fa-bell fa-2x"></i>
                                             <span class="badge" id="badge"></span>  <!-- Notification Count -->
                                         </span></a>
-
                                 <div id="notification-container" class="dropdown-menu" role="menu" aria-labelledby="drop3" style="position: absolute;transform: translate3d(0px, 86px, 0px);top: 0px;left: 0px;will-change: transform;width: fit-content;">
-
                                     <section class="panel">
                                         <header class="panel-heading">
                                             <strong>Notifications</strong>
                                         </header><div id="notification-list" class="list-group list-group-alt">
-
                                             <div style="" id="notificationDrop">
-
-                                                <!--     <ul class="noty-manager-list-item noty-manager-list-item-error">
-                                                      <div class="activity-item">
-                                                            <div class="activity">
-                                                                <a>FriendId</a> Sent you friend Request
-                                                                <button >Confirm</button>
-                                                                <button >decline</button>
-                                                                <span>14 minutes ago</span>
-                                                            </div>
-                                                    </div>
-                                                </ul>-->
-
                                             </div>
                                     </div>
                                         <footer class="panel-footer">
@@ -56,11 +39,9 @@
                                             <a data-toggle="class:show animated fadeInRight"></a>
                                         </footer>
                                     </section>
-
                                 </div>
                             </li>
                         </ul>
-
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">
@@ -71,30 +52,17 @@
                                 <input type="text" id="addFriend" class="form-control" placeholder="Search...">
                             </label>  <!--Search results-->
                         </div>
-
                     <ul id="recentChatsUl" class="list-unstyled chat-list mt-2 mb-0">
-
-
                         <!---The Recent Chats will be populated here inside from the JS -->
-
                     </ul>
-
                     </div>
                     <div class="chat">
                         <div class="chat-header clearfix">
                             <div class="row">
-                                <div class="col-lg-6">
-                                    <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
-                                    </a><div class="chat-about">
-                                    <h6 class="m-b-0">Aiden Chavez</h6>
-                                    <small>Last seen: 2 hours ago</small>
+                                <div id="about" class="col-lg-6">
                                 </div>
-                                </div>
-
                             </div>
                         </div>
-
                         <div class="chat-history" id="chatHistory">
                             <ul class="m-b-0" id="chatList">
 
@@ -102,7 +70,6 @@
 
                             </ul>
                         </div>
-
                         <div class="chat-message clearfix">
                             <div class="input-group mb-0">
                                 <div class="input-group-prepend">
@@ -121,7 +88,6 @@
         </div>
     </div>
 </div>
-
 <div id="overlay" onclick="overlayOff()">
     <div id="fb">
         <div id="fb-top">
@@ -134,11 +100,6 @@
         </div>
     </div>
 </div>
-
-
-
-
-
 
 </body>
 <style type="text/css">

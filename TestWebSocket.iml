@@ -38,6 +38,11 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="jquery-1.12.0" level="application" />
+    <orderEntry type="library" name="jquery-migrate-1.2.1" level="application" />
+    <orderEntry type="library" name="mdb" level="application" />
+    <orderEntry type="library" name="compiled-addons-4.20.0" level="application" />
+    <orderEntry type="library" name="all" level="application" />
     <orderEntry type="library" name="Maven: mysql:mysql-connector-java:8.0.27" level="project" />
     <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:3.11.4" level="project" />
     <orderEntry type="library" name="Maven: jstl:jstl:1.2" level="project" />
@@ -98,10 +103,11 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-engine:1.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.weld.servlet:weld-servlet-shaded:4.0.0.Final" level="project" />
     <orderEntry type="library" name="Maven: jakarta.annotation:jakarta.annotation-api:2.0.0" level="project" />
-    <orderEntry type="library" name="jquery-1.12.0" level="application" />
-    <orderEntry type="library" name="jquery-migrate-1.2.1" level="application" />
-    <orderEntry type="library" name="mdb" level="application" />
-    <orderEntry type="library" name="compiled-addons-4.20.0" level="application" />
-    <orderEntry type="library" name="all" level="application" />
+    <orderEntry type="library" name="Maven: io.jsonwebtoken:jjwt-api:0.11.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.jsonwebtoken:jjwt-impl:0.11.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: io.jsonwebtoken:jjwt-jackson:0.11.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.9.10.3" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.10" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: com.fasterxml.jackson.core:jackson-core:2.9.10" level="project" />
   </component>
 </module>

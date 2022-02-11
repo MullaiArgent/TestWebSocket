@@ -84,7 +84,8 @@
                 out.println("<input type=\"password\" placeholder=\"Enter Password\" name= \"j_password\" required>");
                 out.println("<button type=\"submit\" value = \"check\">Login</button>");
                 out.println("</form>");
-                out.println("<form action=\"adduser\">" +
+                out.println("");
+                out.println("<form action=\"register\">" +
                         "    <button type=\"submit\">" +
                         "        Sign-Up" +
                         "    </button>\n" +
@@ -116,24 +117,18 @@
                     e.printStackTrace();
                 }
                 if (createNew) {
-                    out.println("<form action=\"registerGoogleUser\" method=\"POST\">");
-                    out.println("<input value=\"" + picture + "\" name=\"picture\" hidden>");
-                    out.println("<input value=\"" + name + "\" name=\"name\" hidden>");
-                    out.println("<input value=\"" + email + "\" name=\"email\" hidden>");
-                    out.println("<img src=" + picture + " alt=" + givenName + ">");
-                    out.println("<h4>Hello " + givenName + " !! </h4><br>");
-                    out.println("<input type=\"text\" value=\"givenName\" name=\"AppSpecUser\" hidden><br>");
-                    out.println("<button type=\"submit\" value = \"check\">Sign in as "+ givenName +" </button>");
-                    out.println("</form>");
-                }else{
-                    session.removeAttribute("state");
-                    out.println("<img src=" + picture + " alt=" + givenName + ">");
-                    out.println("<form action=\"j_security_check\" method=\"POST\">");
-                    out.println("<input type=\"text\" value=\""+email+"\" name=\"j_username\" hidden>");
-                    out.println("<input type=\"password\" value=\""+ helper.getAccessToken() +"\" name= \"j_password\" hidden>");
-                    out.println("<button type=\"submit\" value =\"check\">Login in as "+ givenName +" </button>");
-                    out.println("</form>");
+                    try {
+                        db.dml("INSERT INTO public.\"USERS\" VALUES ('" + email + "','" + name + "','" + picture + "','{}');");
+                    } catch (ClassNotFoundException | SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
+                    out.println("<img src=" + picture + "style=\"position: center\" alt=" + givenName + ">");
+                    out.println("<form action=\"j_security_check\" method=\"POST\">");
+                    out.println("<input type=\"text\" value=\"" + email + "\" name=\"j_username\" hidden>");
+                    out.println("<input type=\"password\" value=\"" + helper.getAccessToken() + "\" name= \"j_password\" hidden>");
+                    out.println("<button type=\"submit\" value =\"check\">Login in as " + givenName + " </button>");
+                    out.println("</form>");
             }
         %>
 </div>
