@@ -7,9 +7,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import javax.crypto.spec.SecretKeySpec;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,11 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.security.Key;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
+import java.util.Objects;
 
 @WebServlet(urlPatterns = "/createAccount")
 public class CreateAccountController extends HttpServlet {
@@ -46,10 +43,10 @@ public class CreateAccountController extends HttpServlet {
     @Override
     public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
+        PrintWriter out = res.getWriter();
         HttpSession session = req.getSession();
         String token = (String) session.getAttribute("invitationToken");
-        session.removeAttribute("invitationToken");
-        PrintWriter out = res.getWriter();
+
         if (token != null) {
             String secret = "asdfSFS34wfsdfsdfSDSD32dfsddDDerQSNCK34SOWEK5354fdgdf4";
             Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret), SignatureAlgorithm.HS256.getJcaName());
@@ -60,7 +57,6 @@ public class CreateAccountController extends HttpServlet {
             boolean invited = false;
             String friendIdParameter = req.getParameter("mail_id");
             String userIdJwt = getValue(String.valueOf(jwt), "userId");
-            System.out.println(userIdJwt);
             String friendIdJwt = getValue(String.valueOf(jwt), "friendId");
             try {
 
@@ -78,7 +74,11 @@ public class CreateAccountController extends HttpServlet {
                     db.dml("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '" + friendIdParameter + "') where \"ID\"='" + userIdJwt + "';");
                     db.dml("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '" + userIdJwt + "') where \"ID\"='" + friendIdParameter + "';");
                     db.dml("UPDATE public.\"NOTIFICATION\" set \"ACTIVITY_TYPE\" = 'friends' where \"RECIPIENT_ID\"='"+ friendIdParameter +"' and \"SENDER_ID\"='"+ userIdJwt +"';");
-                    // TODO notify front end
+
+                    session.setAttribute("userIdJwt",userIdJwt);
+                    session.setAttribute("friendIdJwt",friendIdJwt);
+                    res.sendRedirect("app");
+
                 } catch (ClassNotFoundException | SQLException e) {
                     e.printStackTrace();
                 }
@@ -88,6 +88,7 @@ public class CreateAccountController extends HttpServlet {
             }
         } else {
             addUSer(req);
+            res.sendRedirect("app");
         }
     }
     private void addUSer(HttpServletRequest req){
@@ -96,15 +97,23 @@ public class CreateAccountController extends HttpServlet {
             String profilePic;
             String password;
             String re_password;
+            String mail_id;
 
             userId = req.getParameter("userid");
             fullName = req.getParameter("full_name");
             profilePic = req.getParameter("profile_pic");
+            System.out.println(profilePic + "the profile ");
+            if(Objects.equals(profilePic, "")){
+                profilePic = "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png";
+            }
+            System.out.println(profilePic + "the profile ");
             password = req.getParameter("password");
             re_password = req.getParameter("re_password");
+            mail_id = req.getParameter("mail_id");
+
             if (password.equals(re_password)) {
                 try {
-                    db.dml("INSERT INTO public.\"USERS\" VALUES ('" + userId + "','" + fullName + "','" + profilePic + "','{}');");
+                    db.dml("INSERT INTO public.\"USERS\" VALUES ('" + userId + "','" + fullName + "','" + profilePic + "','{}', '"+mail_id+"');");
                     db.addUser("INSERT INTO users VALUES ('" + userId + "','" + password + "')");
                     db.addUser("INSERT INTO users_roles VALUES ('" + userId + "','user')");
                 } catch (ClassNotFoundException | SQLException e) {

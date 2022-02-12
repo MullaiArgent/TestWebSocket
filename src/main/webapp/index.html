@@ -1,7 +1,7 @@
 <html lang="html">
 <head><base target="_parent"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&amp;display=swap"><link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/bootstrap.min.css"><link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/mdb.min.css"><link rel="stylesheet" href="https://mdbootstrap.com/wp-content/themes/mdbootstrap4/docs-app/css/compiled-addons-4.20.0.min.css"><link rel="stylesheet" type="text/css" href="https://mdbootstrap.com/wp-content/themes/mdbootstrap4/css/mdb-plugins-gathered.min.css"><style></style><style type="text/css">/* Chart.js */
 @-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}</style>
-    <title>Chatter</title></head>
+    <title id="title"></title></head>
 <body data-new-gr-c-s-check-loaded="14.1047.0" data-gr-ext-installed="">
 <div id="snippetContent">
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
@@ -21,10 +21,10 @@
                     <div id="recentChatList" class="people-list">
                         <ul class="notificationsbtn nav navbar-nav navbar-right">
                             <li id="notificationsli">
-                                <a id="notifications" href="#" id="drop3" role="button" class="dropdown-toggle" data-toggle="dropdown">
+                                <a onclick="viewNotification()" id="notifications" href="#" id="drop3" role="button" class="dropdown-toggle" data-toggle="dropdown">
                                         <span class="fa-stack fa-2x"> <!-- onclick="viewNotification()"-->
-                                            <i class="fas fa-bell fa-2x"></i>
-                                            <span class="badge" id="badge"></span>  <!-- Notification Count -->
+                                            <i  class="fas fa-bell fa-2x"></i>
+                                            <span  class="badge" id="badge"></span>  <!-- Notification Count -->
                                         </span></a>
                                 <div id="notification-container" class="dropdown-menu" role="menu" aria-labelledby="drop3" style="position: absolute;transform: translate3d(0px, 86px, 0px);top: 0px;left: 0px;will-change: transform;width: fit-content;">
                                     <section class="panel">
@@ -58,6 +58,9 @@
                     </div>
                     <div class="chat">
                         <div class="chat-header clearfix">
+                            <form action="logout" method="post">
+                            <button class="logout button" type="submit">Log out</button>
+                            </form>
                             <div class="row">
                                 <div id="about" class="col-lg-6">
                                 </div>
@@ -103,6 +106,12 @@
 
 </body>
 <style type="text/css">
+    button.logout.button {
+        position: absolute;
+        right: 20;
+        background: lightblue;
+        border-block-color: white;
+    }
     body{
     background-color: #f4f7f6;
     margin-top:20px;

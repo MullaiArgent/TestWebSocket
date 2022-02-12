@@ -127,7 +127,7 @@ function printNotification(message) {
         activity.appendChild(a);
     }
     if (message.activity === "friends") {
-        activity.innerHTML = "You are now Friends";
+        activity.innerHTML = "You are now Friends ";
         activityItem.appendChild(activity);
         const a = document.createElement("a");
         a.innerHTML = message.receiver;
@@ -344,8 +344,6 @@ function cancelIncomingFriendRequest(friendId) {
         action: "cancelIncomingFriendRequest",
         friendId: friendId
     };
-    const Count = document.getElementById("badge");
-    Count.innerHTML = parseInt(Count.innerHTML) - 1;
     removeNotification(ChatAction);
     socket.send(JSON.stringify(ChatAction));
 }
@@ -374,4 +372,12 @@ function overlayOff() {
     document.getElementById("overlay").style.display = "none";
     const popWindowProfile = document.getElementById("forProfile");
     popWindowProfile.innerHTML = "";
+}
+function viewNotification(){
+    const Count = document.getElementById("badge");
+    Count.innerHTML = 0;
+    const ChatAction = {
+        action : "notificationsViewed"
+    }
+    socket.send(JSON.stringify(ChatAction));
 }

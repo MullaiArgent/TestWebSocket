@@ -82,7 +82,7 @@
                 out.println("<input type=\"text\" placeholder=\"Enter Username\" name= \"j_username\" required>");
                 out.println("<label>Password : </label>");
                 out.println("<input type=\"password\" placeholder=\"Enter Password\" name= \"j_password\" required>");
-                out.println("<button type=\"submit\" value = \"check\">Login</button>");
+                out.println("<button type=\"submit\" value = \"Login\">Login</button>");
                 out.println("</form>");
                 out.println("");
                 out.println("<form action=\"register\">" +
