@@ -7,7 +7,6 @@ import models.RecentChatModel;
 import javax.enterprise.context.ApplicationScoped;
 import javax.json.JsonObject;
 import javax.json.spi.JsonProvider;
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.sql.Array;
@@ -199,6 +198,7 @@ public class SessionHandler {
         System.out.println("the session is being removed");
         sessions.entrySet().removeIf(entry -> session.equals(entry.getValue()));
     }
+
     public void sendMessage(String userId, JsonObject jsonObject){
         String friendId = jsonObject.getString("friendId");
         String message = jsonObject.getString("message");
@@ -219,24 +219,25 @@ public class SessionHandler {
     }
     public void addFriendWindow(String userId, JsonObject jsonObject, Session session) throws SQLException, ClassNotFoundException {
         String friendId = jsonObject.getString("friendId");
-        ResultSet addFriendResultSet = db.dql("SELECT \"ID\",\"PROFILEPIC\" FROM public.\"USERS\"");
-        while (addFriendResultSet.next()){
-            if (addFriendResultSet.getString(1).equals(friendId)){
+        if (!friendId.equals("")){
+            ResultSet addFriendResultSet = db.dql("SELECT \"ID\",\"PROFILEPIC\" FROM public.\"USERS\"");
+        while (addFriendResultSet.next()) {
+            if (addFriendResultSet.getString(1).equals(friendId)) {
                 String profile = addFriendResultSet.getString(2);
                 ResultSet friendListResultSet = db.dql("SELECT \"FRIENDS\" FROM public.\"USERS\" WHERE \"ID\"='" + userId + "' ");
-                while (friendListResultSet.next()){
+                while (friendListResultSet.next()) {
                     Array friends;
                     String[] friendsArray = new String[0];
-                    if (!friendListResultSet.getString(1).equals("{}")){
+                    if (!friendListResultSet.getString(1).equals("{}")) {
                         friends = friendListResultSet.getArray(1);
-                        friendsArray = (String[])friends.getArray();
-                    }else {
+                        friendsArray = (String[]) friends.getArray();
+                    } else {
                         JsonObject addMessage = createFriendRequestWindowMessage(friendId, profile);
                         sendToSession(session, addMessage); // has no friend, fd reqing
                         return;
                     }
                     for (String friend : friendsArray) {
-                        if (friendId.equals(friend)){
+                        if (friendId.equals(friend)) {
                             // are fds, chat window
                             JsonObject addMessage = createAlreadyAFriendWindowMessage(friendId, profile);
                             sendToSession(session, addMessage);
@@ -250,15 +251,16 @@ public class SessionHandler {
             }
         }
         // user does not exist, send Invitation
-        ResultSet invitationResultSet = db.dql("SELECT * FROM public.\"NOTIFICATION\" where \"RECIPIENT_ID\" = '"+friendId+"' and \"SENDER_ID\" ='"+userId+"';");
+        ResultSet invitationResultSet = db.dql("SELECT * FROM public.\"NOTIFICATION\" where \"RECIPIENT_ID\" = '" + friendId + "' and \"SENDER_ID\" ='" + userId + "';");
         System.out.println("from " + userId + " to " + friendId);
-        while (invitationResultSet.next()){
+        while (invitationResultSet.next()) {
             System.out.println("inside the notification query");
             sendToSession(session, createAlreadyInvitedWindowMessage(friendId));
             return;
         }
         JsonObject addMessage = createInvitationWindowMessage(friendId);
         sendToSession(session, addMessage);
+    }
     }
     public JsonObject createAlreadyAFriendWindowMessage(String friendId, String profile){
         JsonProvider provider = JsonProvider.provider();

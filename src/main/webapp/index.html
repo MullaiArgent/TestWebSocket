@@ -14,10 +14,10 @@
     </script>
     <link  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="websocket.js"></script>
-    <div class="container">
+<!--    <div class="container">-->
         <div class="row clearfix">
             <div class="col-lg-12">
-                <div class="card chat-app" style="height: 700px">
+                <div class="card chat-app">
                     <div id="recentChatList" class="people-list">
                         <ul class="notificationsbtn nav navbar-nav navbar-right">
                             <li id="notificationsli">
@@ -45,7 +45,7 @@
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">
-                                    <i class="fas fa-user-plus fa-2x" onclick="addFriend()"></i>
+                                    <i href="#" class="fas fa-user-plus fa-2x" onclick="addFriend()"></i>
                                 </span>
                             </div>
                             <label>
@@ -89,9 +89,9 @@
                 </div>
             </div>
         </div>
-    </div>
+<!--    </div>-->
 </div>
-<div id="overlay" onclick="overlayOff()">
+<div id="overlay" onclick="overlayOff()">bod
     <div id="fb">
         <div id="fb-top">
             <p><b id="popWindowType"></b></p>
@@ -114,11 +114,13 @@
     }
     body{
     background-color: #f4f7f6;
-    margin-top:20px;
+        width: max-content;
+        height: max-content;
+    /*margin-top:20px;*/
 }
     body {
-        padding-top: 50px;
-        padding-right:100px;
+        /*padding-top: 50px;*/
+        /*padding-right:100px;*/
     }
 
 
@@ -227,7 +229,7 @@
     {
         position: absolute;
         top: -8px;
-        background-color: #fb6b5b;
+        background-color: #89bfde;
         color: #fff;
         padding: 2px 5px !important;
         font-size: 9px;
@@ -251,13 +253,16 @@
     margin-top: -60%;
 }
 .card {
-    background: #fff;
+    background: #f3ecec;
     transition: .5s;
     border: 0;
-    margin-bottom: 30px;
+    /*margin-bottom: 30px;*/
     border-radius: .55rem;
-    position: relative;
+    position: fixed;
     width: 100%;
+    height:max-content;
+
+
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 10%);
 }
     #fb{
@@ -279,7 +284,7 @@
     }
 
     #fb-top span{
-        color:#4267B2;
+        color: #5684e1;
         float:right;
         margin-right:10px;
     }
@@ -307,7 +312,7 @@
     }
 
     #info {
-        color:#4267B2;
+        color: #5e7dbd;
         line-height:25px;
         font-size:18px;
     }
@@ -433,7 +438,9 @@
 
 .chat .chat-header {
     padding: 15px 20px;
-    border-bottom: 2px solid #f4f7f6
+    border-bottom: 2px solid #f4f7f6;
+    height: 100px;
+    background: #ded3d3;
 }
 
 .chat .chat-header img {
@@ -448,8 +455,13 @@
 }
 
 .chat .chat-history {
+    background: #ffffff;
+    border-bottom: 2px solid #ffffff;
+    height: 410px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    text-align: center;
     padding: 20px;
-    border-bottom: 2px solid #fff
 }
 
 .chat .chat-history ul {

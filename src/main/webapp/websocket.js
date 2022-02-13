@@ -2,6 +2,7 @@ window.onload = init;
 const socket = new WebSocket("ws://localhost:8080/TestWebSocket_war/actions");
 socket.onmessage = onMessage;
 let globalFriendId = "";
+
 function init(){
 
 }
@@ -68,6 +69,8 @@ function printChat(chat){
         chatData.innerHTML = chat.data;
         chatIl.appendChild(chatData);
     }
+    var scroller = document.querySelector('#chatList');
+    scroller.screenTop = scroller.scrollHeight - scroller.clientHeight;
 }
 function printNotification(message) {
     const n = document.getElementById("notificationDrop");
@@ -142,14 +145,12 @@ function printNotification(message) {
     }
 }
 function removeNotification(message){
-    console.log("remove the notification" + message.friendId)
     const node = document.getElementById(message.friendId);
-    console.log("remove the notification" + message.friendId)
-    node.innerHTML = ""
+    node.parentNode.removeChild(node)
 }
 function removeChat(){
     const chatList = document.getElementById("chatList")
-    chatList.innerHTML = "";
+    chatList.parentNode.removeChild(chatList);
 }
 function onMessage(event) {
     const message = JSON.parse(event.data);
@@ -306,12 +307,14 @@ function sendMessage() {
     document.getElementById("messageToSend").value = "";
     const date = new Date();
     if (globalFriendId !== "") {
+
         const ChatAction = {
             action: "sendMessage",
             friendId: globalFriendId,
             message: message + "",
             time: "" + date.getHours() + ":" + date.getMinutes()
         };
+
         socket.send(JSON.stringify(ChatAction));
     }
 }
@@ -334,8 +337,6 @@ function cancelOutGoingFriendRequest(friendId) {
         action: "cancelOutGoingFriendRequest",
         friendId: friendId
     };
-    const Count = document.getElementById("badge");
-    Count.innerHTML = parseInt(Count.innerHTML) - 1;
     removeNotification(ChatAction);
     socket.send(JSON.stringify(ChatAction));
 }
@@ -349,7 +350,7 @@ function cancelIncomingFriendRequest(friendId) {
 }
 function confirmFriendRequest(friendId) {
     const n = document.getElementById("notificationDrop");
-    n.innerHTML = "";
+    n.parentNode.removeChild(n);
     const ChatAction = {
         action: "confirmFriendRequest",
         friendId: friendId
@@ -363,7 +364,12 @@ function addFriend() {
         action: "addFriend",
         friendId: friendId
     };
-    socket.send(JSON.stringify(ChatAction));
+    if (friendId !== ""){
+
+        socket.send(JSON.stringify(ChatAction));
+    }else{
+        console.log(friendId + "from the fi")
+    }
 }
 function overlayOn() {
     document.getElementById("overlay").style.display = "block";
