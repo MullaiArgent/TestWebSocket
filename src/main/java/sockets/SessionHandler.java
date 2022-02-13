@@ -198,7 +198,6 @@ public class SessionHandler {
         System.out.println("the session is being removed");
         sessions.entrySet().removeIf(entry -> session.equals(entry.getValue()));
     }
-
     public void sendMessage(String userId, JsonObject jsonObject){
         String friendId = jsonObject.getString("friendId");
         String message = jsonObject.getString("message");
@@ -312,7 +311,6 @@ public class SessionHandler {
         }catch (Exception e){
             System.out.println(friendId + "is Offline");
         }
-        sendToSession(session,addMessage1);
 
         NotificationModel notificationModel1 = new NotificationModel();
         notificationModel1.setId(notificationModelId); notificationModelId++;
@@ -363,6 +361,7 @@ public class SessionHandler {
             JsonObject addMessage2 = createAddNotificationMessage(notificationModel);
             try {
                 sendToSession(sessions.get(friendId), addMessage3);
+                sendToSession(sessions.get(friendId), addMessage2);
             }catch (Exception e){
                 System.out.println(friendId + "is Offline");
             }
@@ -456,5 +455,4 @@ public class SessionHandler {
     public void notificationsViewed(String userId) throws SQLException, ClassNotFoundException {
         db.dml(" UPDATE public.\"NOTIFICATION\" SET \"IS_READ\"='true' WHERE (\"RECIPIENT_ID\"='"+userId+"' or \"SENDER_ID\"='"+userId+"') and \"IS_READ\"='false'");
     }
-
 }

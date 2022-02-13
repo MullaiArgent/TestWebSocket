@@ -17,8 +17,6 @@ import java.util.logging.Logger;
 @ApplicationScoped
 @ServerEndpoint(value = "/actions", configurator = HttpSessionConfigurer.class)
 public class WebSocketServer {
-
-
     private final SessionHandler sessionHandler = new SessionHandler();
     String userId;
     HttpSession httpSession;
@@ -45,23 +43,23 @@ public class WebSocketServer {
     }
     @OnError
     public void error(Throwable error){
-       Logger.getLogger(WebSocketServer.class.getName()).log(Level.SEVERE, null, error);
+        Logger.getLogger(WebSocketServer.class.getName()).log(Level.SEVERE, null, error);
     }
     @OnMessage
     public void handleMessage(String message, Session session){
         try(JsonReader reader = Json.createReader(new StringReader(message))){
             JsonObject jsonObject = reader.readObject();
             if ("viewChat".equals(jsonObject.getString("action"))){
-                    sessionHandler.addChatModels(userId, jsonObject.getString("friendId"), session);
+                sessionHandler.addChatModels(userId, jsonObject.getString("friendId"), session);
             }
             if ("sendMessage".equals(jsonObject.getString("action"))){
-                    sessionHandler.sendMessage(userId, jsonObject);
+                sessionHandler.sendMessage(userId, jsonObject);
             }
             if ("addFriend".equals(jsonObject.getString("action"))){
-                    sessionHandler.addFriendWindow(userId, jsonObject, session);
+                sessionHandler.addFriendWindow(userId, jsonObject, session);
             }
             if ("friendRequest".equals(jsonObject.getString("action"))){
-                    sessionHandler.sendFriendRequest(userId, jsonObject.getString("friendId"), session);
+                sessionHandler.sendFriendRequest(userId, jsonObject.getString("friendId"), session);
             }
             if ("invitation".equals(jsonObject.getString("action"))){
                 new InvitationMailer().mailer(userId, jsonObject.getString("friendId"));
@@ -78,7 +76,6 @@ public class WebSocketServer {
             if ("notificationsViewed".equals(jsonObject.getString("action"))){
                 sessionHandler.notificationsViewed(userId);
             }
-
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }

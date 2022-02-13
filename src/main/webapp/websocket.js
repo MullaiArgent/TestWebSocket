@@ -74,19 +74,15 @@ function printChat(chat){
 }
 function printNotification(message) {
     const n = document.getElementById("notificationDrop");
-
     const notificationList = document.createElement("div");
     notificationList.setAttribute("class", "noty-manager-list-item noty-manager-list-item-error");
     n.appendChild(notificationList)
-
     const activityItem = document.createElement("div");
     activityItem.setAttribute("class", "activity-item");
     notificationList.setAttribute("id", message.receiver);
     notificationList.appendChild(activityItem);
-
     const activity = document.createElement("div");
     activity.setAttribute("class", "activity");
-
     if (message.activity === "friendRequestSent") {
         activity.innerHTML = "Friend Request Sent to ";
         activityItem.appendChild(activity);
@@ -145,12 +141,16 @@ function printNotification(message) {
     }
 }
 function removeNotification(message){
+    const Count = document.getElementById("badge");
+    if (Count.innerHTML > 0){
+        Count.innerHTML = parseInt(Count.innerHTML) - 1;
+    }
     const node = document.getElementById(message.friendId);
     node.parentNode.removeChild(node)
 }
 function removeChat(){
     const chatList = document.getElementById("chatList")
-    chatList.parentNode.removeChild(chatList);
+    chatList.innerHTML = "";
 }
 function onMessage(event) {
     const message = JSON.parse(event.data);
@@ -175,10 +175,7 @@ function onMessage(event) {
         windowType.appendChild(profile);
 
         const popWindowType = document.getElementById("popWindowType");
-        popWindowType.innerHTML = "Send Friend Request";
-
-        const popWindowFriendName = document.getElementById("popWindowFriendName");
-        popWindowFriendName.innerHTML = message.friendId;
+        popWindowType.innerHTML = "Send Friend Request to " + message.friendId;
 
         const popWindowButton = document.getElementById("popWindowButton");
         popWindowButton.innerHTML = "Add Friend"
@@ -199,10 +196,7 @@ function onMessage(event) {
         windowType.appendChild(profile);
 
         const popWindowType = document.getElementById("popWindowType");
-        popWindowType.innerHTML = "Send Invitation";
-
-        const popWindowFriendName = document.getElementById("popWindowFriendName");
-        popWindowFriendName.innerHTML = message.friendId;
+        popWindowType.innerHTML = "Send Invitation to " + message.friendId;
 
         const popWindowButton = document.getElementById("popWindowButton");
         popWindowButton.innerHTML = "Invite"
@@ -224,10 +218,7 @@ function onMessage(event) {
         windowType.appendChild(profile);
 
         const popWindowType = document.getElementById("popWindowType");
-        popWindowType.innerHTML = "Already a Friend";
-
-        const popWindowFriendName = document.getElementById("popWindowFriendName");
-        popWindowFriendName.innerHTML = message.friendId;
+        popWindowType.innerHTML = message.friendId + "is Already a Friend";
 
         const popWindowButton = document.getElementById("popWindowButton");
         popWindowButton.innerHTML = "Chat"
@@ -248,10 +239,7 @@ function onMessage(event) {
         windowType.appendChild(profile);
 
         const popWindowType = document.getElementById("popWindowType");
-        popWindowType.innerHTML = "Already Invited";
-
-        const popWindowFriendName = document.getElementById("popWindowFriendName");
-        popWindowFriendName.innerHTML = message.friendId;
+        popWindowType.innerHTML = "Already Invited "  + message.friendId;
 
         const popWindowButton = document.getElementById("popWindowButton");
         popWindowButton.innerHTML = "Close"
@@ -269,8 +257,7 @@ function onMessage(event) {
     }
     if (message.action === "removeNotification"){
         removeNotification(message);
-    }
-}
+    }}
 function removeLabel(){
     const chatAbout = document.getElementById("about");
     chatAbout.innerHTML = ""
@@ -318,7 +305,7 @@ function sendMessage() {
         socket.send(JSON.stringify(ChatAction));
     }
 }
-function sendFriendRequest(friendId) {
+function sendFriendRequest(friendId){
     const ChatAction = {
         action: "friendRequest",
         friendId: friendId
