@@ -26,10 +26,10 @@ public class SessionHandler {
     private static final HashMap<String, Session> sessions = new HashMap<>();
     public void addSession(Session session, String userId) throws SQLException, ClassNotFoundException {
         sessions.put(userId, session);
-        System.out.println("Session add to "+ userId);
+        System.out.println("Session add to Hash for "+ userId);
 
         db.dml("UPDATE public.\"USERS\" SET active='online' WHERE \"ID\"='"+userId+"';");
-        // TODO ping the friends
+        pingAllFriends(userId, "backOnline");
 
         final List<RecentChatModel> recentChatModels = createRecentChatModels(userId);
         for (RecentChatModel recentChatModel : recentChatModels){
@@ -47,8 +47,9 @@ public class SessionHandler {
 
     }
     public void removeSession(Session session, String userId) throws SQLException, ClassNotFoundException {
+        System.out.println(userId + " has left the App, being removed");
         db.dml("UPDATE public.\"USERS\" SET active='offline' WHERE \"ID\"='"+ userId +"';");
-        // ping the friends
+        pingAllFriends(userId, "wentOffline");
         sessions.entrySet().removeIf(entry -> session.equals(entry.getValue()));
     }
     private List<NotificationModel> createNotificationModels(String userId) throws SQLException, ClassNotFoundException {
@@ -482,5 +483,29 @@ public class SessionHandler {
         notificationModel1.setSender(userId);
         JsonObject addMessage3 = createAddNotificationMessage(notificationModel1);
         sendToSession(sessions.get(userId), addMessage3);
+    }
+    public void pingAllFriends(String userId, String message) throws SQLException, ClassNotFoundException {
+        ResultSet friendListResultSet = db.dql("SELECT \"FRIENDS\" FROM public.\"USERS\" WHERE \"ID\"='" + userId + "' ");
+        while (friendListResultSet.next()) {
+            Array friends;
+            String[] friendsArray = new String[0];
+            if (!friendListResultSet.getString(1).equals("{}")) {
+                friends = friendListResultSet.getArray(1);
+                friendsArray = (String[]) friends.getArray();
+            }
+            for (String friendId : friendsArray) {
+                JsonProvider provider = JsonProvider.provider();
+                JsonObject addMessage = provider.createObjectBuilder()
+                        .add("action", message)
+                        .add("friendId", userId)
+                        .build();
+                try {
+                    System.out.println("Sending ping to " + friendId + " that "+ userId + " is " + message);
+                    sendToSession(sessions.get(friendId), addMessage);
+                }catch (Exception e){
+                    System.out.println(friendId + " is Offline");
+                }
+            }
+        }
     }
 }

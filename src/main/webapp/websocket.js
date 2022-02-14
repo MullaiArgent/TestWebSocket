@@ -35,9 +35,11 @@ function printRecentChats(recentChat){
     status.setAttribute("id","status"+recentChat.name);
     status.setAttribute("class","status");
     about.appendChild(status);
-    status.innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + recentChat.active;
-
-
+    if (recentChat.active === "online") {
+        status.innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + recentChat.active;
+    }else {
+        status.innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + recentChat.active;
+    }
 }
 function printChat(chat){
     const chatHistory = document.getElementById("chatList")
@@ -263,7 +265,25 @@ function onMessage(event) {
     }
     if (message.action === "removeNotification"){
         removeNotification(message);
-    }}
+    }
+    if (message.action === "backOnline"){
+        const status = document.getElementById("status"+message.friendId);
+        status.innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + "online";
+
+        const aboutStatus = document.getElementById("aboutStatus"+message.friendId)
+        if (aboutStatus !== null) {
+        aboutStatus.innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + "online";
+        }
+    }
+    if (message.action === "wentOffline"){
+        const status = document.getElementById("status"+message.friendId);
+            status.innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + "offline";
+        const aboutStatus = document.getElementById("aboutStatus"+message.friendId);
+        if (aboutStatus !== null) {
+            aboutStatus.innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + "offline";
+        }
+    }
+}
 function removeLabel(){
     const chatAbout = document.getElementById("about");
     chatAbout.innerHTML = ""
@@ -283,14 +303,11 @@ function applyTheLabel(friendId){
     chatAbout.appendChild(name);
 
     const status = document.getElementById("status"+ friendId);
-    const statusClone = status.cloneNode(true);
-
-    //const status = document.createElement("div");
-    //status.setAttribute("id","status");
-    //status.setAttribute("class","status");
-    document.getElementById("about").appendChild(statusClone);
-    //status.innerHTML = "<i class=\"fa fa-circle online\"></i>online";
-
+    const aboutStatus = document.createElement("div");
+    aboutStatus.setAttribute("id","aboutStatus"+friendId);
+    aboutStatus.setAttribute("class","status");
+    aboutStatus.innerHTML = status.innerHTML;
+    chatAbout.appendChild(aboutStatus);
 
 }
 function viewChat(friendId) {

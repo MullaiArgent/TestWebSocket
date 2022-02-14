@@ -38,7 +38,6 @@ public class WebSocketServer {
     }
     @OnClose
     public void close(Session session) throws SQLException, ClassNotFoundException {
-        // TODO Update the db
         sessionHandler.removeSession(session, userId);
     }
     @OnError
