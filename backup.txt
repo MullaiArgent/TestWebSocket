@@ -34,7 +34,7 @@
                                 <div class="name">Monica Ward</div>
                                 <div class="status">
                                     <i class="fa fa-circle online"></i> online</div>
-                            </div>
+                                </div>
                         </li>
 
 
@@ -42,7 +42,9 @@
                             <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar">
                             <div class="about">
                                 <div class="name">Dean Henry</div>
-                                <div class="status"> <i class="fa fa-circle offline"></i>offline</div>
+                                <div id="status" class="status">
+                                 <i class="fa fa-circle offline"></i>offline
+                                 </div>
                             </div>
                         </li>
 

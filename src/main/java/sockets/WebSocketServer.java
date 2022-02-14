@@ -25,7 +25,6 @@ public class WebSocketServer {
         httpSession = (HttpSession) config.getUserProperties().get(HttpSession.class.getName());
         userId = (String) httpSession.getAttribute("userId");
         sessionHandler.addSession(session, userId);
-
         String token = (String) httpSession.getAttribute("invitationToken");
         String userIdJwt = (String) httpSession.getAttribute("userIdJwt");
         String friendIdJwt = (String) httpSession.getAttribute("friendIdJwt");
@@ -38,8 +37,9 @@ public class WebSocketServer {
 
     }
     @OnClose
-    public void close(Session session){
-        sessionHandler.removeSession(session);
+    public void close(Session session) throws SQLException, ClassNotFoundException {
+        // TODO Update the db
+        sessionHandler.removeSession(session, userId);
     }
     @OnError
     public void error(Throwable error){
@@ -62,7 +62,7 @@ public class WebSocketServer {
                 sessionHandler.sendFriendRequest(userId, jsonObject.getString("friendId"), session);
             }
             if ("invitation".equals(jsonObject.getString("action"))){
-                new InvitationMailer().mailer(userId, jsonObject.getString("friendId"));
+                new InvitationMailer().mailer(userId, jsonObject);
             }
             if ("cancelOutGoingFriendRequest".equals(jsonObject.getString("action"))){
                 sessionHandler.cancelOutGoingFriendRequest(userId,jsonObject);

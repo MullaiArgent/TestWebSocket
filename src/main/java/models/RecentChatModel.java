@@ -3,18 +3,8 @@ package models;
 public class RecentChatModel {
     private int id = 0;
     private String name;
-    private boolean active = false;
+    private String active = "offline(default)";
     private String profile;
-
-    @Override
-    public String toString() {
-        return "RecentChatModel{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", active=" + active +
-                ", profile='" + profile + '\'' +
-                '}';
-    }
 
     public int getId() {
         return id;
@@ -32,11 +22,11 @@ public class RecentChatModel {
         this.name = name;
     }
 
-    public boolean isActive() {
+    public String getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(String active) {
         this.active = active;
     }
 

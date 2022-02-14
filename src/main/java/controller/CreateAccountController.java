@@ -22,6 +22,7 @@ import java.util.Objects;
 
 @WebServlet(urlPatterns = "/createAccount")
 public class CreateAccountController extends HttpServlet {
+
     private String getValue(String jwt, String key){
         StringBuilder val = new StringBuilder();
         for (int i = 0; i < jwt.length();i++){
@@ -38,13 +39,13 @@ public class CreateAccountController extends HttpServlet {
         }
         return val.toString();
     }
-
+    HttpSession session;
     JDBC db = new JDBC();
     @Override
     public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
         PrintWriter out = res.getWriter();
-        HttpSession session = req.getSession();
+        session = req.getSession();
         String token = (String) session.getAttribute("invitationToken");
 
         if (token != null) {
@@ -58,6 +59,8 @@ public class CreateAccountController extends HttpServlet {
             String friendIdParameter = req.getParameter("mail_id");
             String userIdJwt = getValue(String.valueOf(jwt), "userId");
             String friendIdJwt = getValue(String.valueOf(jwt), "friendId");
+            session.setAttribute("userIdJwt",userIdJwt);
+            session.setAttribute("friendIdJwt",friendIdJwt);
             try {
 
                 ResultSet rs = db.dql("SELECT * FROM public.\"NOTIFICATION\" WHERE \"RECIPIENT_ID\"='" + friendIdParameter + "' AND \"SENDER_ID\"='" + userIdJwt + "';");
@@ -72,11 +75,8 @@ public class CreateAccountController extends HttpServlet {
                 addUSer(req);
                 try {
                     db.dml("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '" + friendIdParameter + "') where \"ID\"='" + userIdJwt + "';");
-                    db.dml("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '" + userIdJwt + "') where \"ID\"='" + friendIdParameter + "';");
+                    //db.dml("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '" + userIdJwt + "') where \"ID\"='" + friendIdParameter + "';");
                     db.dml("UPDATE public.\"NOTIFICATION\" set \"ACTIVITY_TYPE\" = 'friends' where \"RECIPIENT_ID\"='"+ friendIdParameter +"' and \"SENDER_ID\"='"+ userIdJwt +"';");
-
-                    session.setAttribute("userIdJwt",userIdJwt);
-                    session.setAttribute("friendIdJwt",friendIdJwt);
                     res.sendRedirect("app");
 
                 } catch (ClassNotFoundException | SQLException e) {
@@ -110,10 +110,9 @@ public class CreateAccountController extends HttpServlet {
             password = req.getParameter("password");
             re_password = req.getParameter("re_password");
             mail_id = req.getParameter("mail_id");
-
             if (password.equals(re_password)) {
                 try {
-                    db.dml("INSERT INTO public.\"USERS\" VALUES ('" + userId + "','" + fullName + "','" + profilePic + "','{}', '"+mail_id+"');");
+                    db.dml("INSERT INTO public.\"USERS\" VALUES ('" + userId + "','" + fullName + "','" + profilePic + "','{"+ session.getAttribute("userIdJwt")+"}', '"+mail_id+"');");
                     db.addUser("INSERT INTO users VALUES ('" + userId + "','" + password + "')");
                     db.addUser("INSERT INTO users_roles VALUES ('" + userId + "','user')");
                 } catch (ClassNotFoundException | SQLException e) {

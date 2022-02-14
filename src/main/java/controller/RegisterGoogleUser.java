@@ -29,7 +29,7 @@ public class RegisterGoogleUser extends HttpServlet {
         profilePic = req.getParameter("picture");
 
         try {
-            db.dml("INSERT INTO public.\"USERS\" VALUES ('" + userId + "','" + fullName + "','" + profilePic + "','{}');");
+            db.dml("INSERT INTO public.\"USERS\" VALUES ('" + userId + "','" + fullName + "','" + profilePic + "','{}','" + userId + "');");
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }

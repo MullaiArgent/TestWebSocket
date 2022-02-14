@@ -38,7 +38,6 @@ public class AuthLoginModule implements LoginModule{
         this.sharedState = sharedState;
         this.options = options;
     }
-
     @Override
     public boolean login() throws LoginException {
 
@@ -83,7 +82,6 @@ public class AuthLoginModule implements LoginModule{
         }
 
     }
-
     @Override
     public boolean commit() {
         if (!loginCompleted){
@@ -102,12 +100,10 @@ public class AuthLoginModule implements LoginModule{
 
         return true;
     }
-
     @Override
     public boolean abort() {
         return false;
     }
-
     @Override
     public boolean logout() {
         subject.getPrincipals().remove(userPrincipal);

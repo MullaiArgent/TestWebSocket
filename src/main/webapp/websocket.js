@@ -28,8 +28,15 @@ function printRecentChats(recentChat){
 
     const name = document.createElement("div");
     name.setAttribute("class","name");
-    name.innerHTML = recentChat.name;
+    name.innerHTML = "&nbsp&nbsp"+recentChat.name;
     about.appendChild(name);
+
+    const status = document.createElement("div");
+    status.setAttribute("id","status"+recentChat.name);
+    status.setAttribute("class","status");
+    about.appendChild(status);
+    status.innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + recentChat.active;
+
 
 }
 function printChat(chat){
@@ -202,7 +209,6 @@ function onMessage(event) {
         popWindowButton.innerHTML = "Invite"
         popWindowButton.onclick = function () {
             sendInvitation(message.friendId);
-            console.log("Invitation to " + message.friendId);
             overlayOff();
         }
         overlayOn();
@@ -266,7 +272,7 @@ function applyTheLabel(friendId){
     removeLabel();
     const chatAbout = document.getElementById("about");
 
-    const avatar = document.getElementById("avatar"+friendId);
+    const avatar = document.getElementById("avatar" + friendId);
     const clone = avatar.cloneNode(false);
     document.getElementById("about").appendChild(clone);
     const chatAbout1 = document.createElement("div");
@@ -275,6 +281,17 @@ function applyTheLabel(friendId){
     name.setAttribute("class","m-b-0");
     name.innerHTML = friendId;
     chatAbout.appendChild(name);
+
+    const status = document.getElementById("status"+ friendId);
+    const statusClone = status.cloneNode(true);
+
+    //const status = document.createElement("div");
+    //status.setAttribute("id","status");
+    //status.setAttribute("class","status");
+    document.getElementById("about").appendChild(statusClone);
+    //status.innerHTML = "<i class=\"fa fa-circle online\"></i>online";
+
+
 }
 function viewChat(friendId) {
     applyTheLabel(friendId);
@@ -313,9 +330,10 @@ function sendFriendRequest(friendId){
     socket.send(JSON.stringify(ChatAction));
 }
 function sendInvitation(friendId) {
+
     const ChatAction = {
         action: "invitation",
-        friendId: friendId
+        friendId: friendId,
     };
     socket.send(JSON.stringify(ChatAction));
 }
@@ -351,11 +369,9 @@ function addFriend() {
         action: "addFriend",
         friendId: friendId
     };
-    if (friendId !== ""){
+    if (friendId !== "") {
 
         socket.send(JSON.stringify(ChatAction));
-    }else{
-        console.log(friendId + "from the fi")
     }
 }
 function overlayOn() {
