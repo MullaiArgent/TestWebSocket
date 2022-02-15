@@ -379,17 +379,19 @@ public class SessionHandler {
 
             RecentChatModel recentChatModel1 = new RecentChatModel();
             recentChatModel1.setName(friendId);
-            ResultSet profileResultSet1 = db.dql("SELECT \"PROFILEPIC\" FROM public.\"USERS\" WHERE \"ID\"='"+ friendId +"';");
+            ResultSet profileResultSet1 = db.dql("SELECT \"PROFILEPIC\",\"active\" FROM public.\"USERS\" WHERE \"ID\"='"+ friendId +"';");
             while (profileResultSet1.next()) {
                 recentChatModel1.setProfile(profileResultSet1.getString(1));
+                recentChatModel1.setActive(profileResultSet1.getString(2));
             }
             sendToSession(session, createAddRecentChatMessage(recentChatModel1));
 
             RecentChatModel recentChatModel2 = new RecentChatModel();
             recentChatModel2.setName(userId);
-            ResultSet profileResultSet2 = db.dql("SELECT \"PROFILEPIC\" FROM public.\"USERS\" WHERE \"ID\"='"+ userId +"';");
+            ResultSet profileResultSet2 = db.dql("SELECT \"PROFILEPIC\",\"active\" FROM public.\"USERS\" WHERE \"ID\"='"+ userId +"';");
             while (profileResultSet2.next()) {
                 recentChatModel2.setProfile(profileResultSet2.getString(1));
+                recentChatModel2.setActive(profileResultSet2.getString(2));
             }
             try {
                 sendToSession(sessions.get(friendId), createAddRecentChatMessage(recentChatModel2));

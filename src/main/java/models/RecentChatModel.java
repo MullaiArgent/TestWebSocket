@@ -3,7 +3,7 @@ package models;
 public class RecentChatModel {
     private int id = 0;
     private String name;
-    private String active = "offline(default)";
+    private String active = "offline";
     private String profile;
 
     public int getId() {

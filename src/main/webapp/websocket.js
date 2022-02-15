@@ -407,3 +407,6 @@ function viewNotification(){
     }
     socket.send(JSON.stringify(ChatAction));
 }
+function selectImage() {
+    // pop up select image window
+}
