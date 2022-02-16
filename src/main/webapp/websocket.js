@@ -447,6 +447,7 @@ function viewNotification(){
     socket.send(JSON.stringify(ChatAction));
 }
 function sendImage(item) {
+    closeNav();
     const date = new Date();
     if (globalFriendId !== "") {
         const chatAction = {

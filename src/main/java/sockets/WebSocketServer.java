@@ -34,7 +34,6 @@ public class WebSocketServer {
             httpSession.removeAttribute("userIdJwt");
             httpSession.removeAttribute("friendIdJwt");
         }
-
     }
     @OnClose
     public void close(Session session) throws SQLException, ClassNotFoundException {
@@ -44,12 +43,12 @@ public class WebSocketServer {
     public void error(Throwable error){
         Logger.getLogger(WebSocketServer.class.getName()).log(Level.SEVERE, null, error);
     }
-    @OnMessage(maxMessageSize = 1048576000)
+    @OnMessage(maxMessageSize = 1048576)
     public void handleMessage(String message, Session session){
         try(JsonReader reader = Json.createReader(new StringReader(message))){
             JsonObject jsonObject = reader.readObject();
             if ("viewChat".equals(jsonObject.getString("action"))){
-                sessionHandler.addChatModels(userId, jsonObject.getString("friendId"), session);
+                sessionHandler.addChatList(userId, jsonObject.getString("friendId"), session);
             }
             if ("sendMessage".equals(jsonObject.getString("action"))){
                 sessionHandler.sendMessage(userId, jsonObject);

@@ -10,7 +10,14 @@ import java.io.IOException;
 public class LogOut extends HttpServlet {
     @Override
     public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        req.getSession(false).invalidate();
-        res.sendRedirect("app");
+        try {
+            req.getSession(false).invalidate();
+
+        }catch (Exception e){
+            System.out.println("There's "+ e +" while logging out the User");
+        }finally {
+            res.sendRedirect("app");
+        }
+
     }
 }
