@@ -78,8 +78,44 @@ function printChat(chat){
         chatData.innerHTML = chat.data;
         chatIl.appendChild(chatData);
     }
-    var scroller = document.querySelector('#chatList');
-    scroller.screenTop = scroller.scrollHeight - scroller.clientHeight;
+}
+function printImage(chat) {
+    const chatHistory = document.getElementById("chatList")
+
+    const chatIl = document.createElement("li");
+    chatIl.setAttribute("class", "clearfix");
+    chatHistory.appendChild(chatIl)
+
+    if (chat.from === "you"){
+        const messageData = document.createElement("div");
+        messageData.setAttribute("class","message-data text-right");
+        chatIl.appendChild(messageData);
+
+        const messageTime = document.createElement("span");
+        messageTime.setAttribute("class","message-data-time");
+        messageTime.innerHTML = chat.time;
+        messageData.appendChild(messageTime);
+
+        const chatData = document.createElement("div");
+        chatData.setAttribute("class","message other-message float-right")
+        chatData.innerHTML = "<img src='" + chat.data  + "' alt=''/>";
+        chatIl.appendChild(chatData);
+
+    }else{
+        const messageData = document.createElement("div");
+        messageData.setAttribute("class","message-data");
+        chatIl.appendChild(messageData);
+
+        const messageTime = document.createElement("span");
+        messageTime.setAttribute("class","message-data-time");
+        messageTime.innerHTML = chat.time;
+        messageData.appendChild(messageTime);
+
+        const chatData = document.createElement("div");
+        chatData.setAttribute("class","message my-message")
+        chatData.innerHTML = "<img src='" + chat.data  + "' alt=''/>";
+        chatIl.appendChild(chatData);
+    }
 }
 function printNotification(message) {
     const n = document.getElementById("notificationDrop");
@@ -167,8 +203,12 @@ function onMessage(event) {
         printRecentChats(message);
     }
     if (message.action === "viewChat") {
-        printChat(message);
-    }
+        if (message.type === "chat") {
+            printChat(message);
+        }
+        else if (message.type === "image"){
+            printImage(message);
+        }}
     if (message.action === "notificationCount") {
         const Count = document.getElementById("badge");
         Count.innerHTML = message.notificationCount;
@@ -333,9 +373,8 @@ function sendMessage() {
             action: "sendMessage",
             friendId: globalFriendId,
             message: message + "",
-            time: "" + date.getHours() + ":" + date.getMinutes()
+            time: date.getHours() + " : " + date.getMinutes()
         };
-
         socket.send(JSON.stringify(ChatAction));
     }
 }
@@ -407,6 +446,16 @@ function viewNotification(){
     }
     socket.send(JSON.stringify(ChatAction));
 }
-function selectImage() {
-    // pop up select image window
+function sendImage(item) {
+    const date = new Date();
+    if (globalFriendId !== "") {
+        const chatAction = {
+            action: "sendImage",
+            friendId: globalFriendId,
+            time: "" + date.getHours() + ":" + date.getMinutes(),
+            encoded: item.href.toString()
+        };
+        socket.send(JSON.stringify(chatAction))
+        console.log("sending image to" + globalFriendId)
+    }
 }

@@ -5,7 +5,15 @@ public class ChatModel {
     private String data;
     private String from;
     private String time;
+    private String type;
 
+    public String getType() {
+        return type;
+    }
+
+    public  void setType(String type) {
+        this.type = type;
+    }
 
     public String getData() {
         return data;

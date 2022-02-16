@@ -44,7 +44,7 @@ public class WebSocketServer {
     public void error(Throwable error){
         Logger.getLogger(WebSocketServer.class.getName()).log(Level.SEVERE, null, error);
     }
-    @OnMessage
+    @OnMessage(maxMessageSize = 1048576000)
     public void handleMessage(String message, Session session){
         try(JsonReader reader = Json.createReader(new StringReader(message))){
             JsonObject jsonObject = reader.readObject();
@@ -74,6 +74,10 @@ public class WebSocketServer {
             }
             if ("notificationsViewed".equals(jsonObject.getString("action"))){
                 sessionHandler.notificationsViewed(userId);
+            }
+            if ("sendImage".equals(jsonObject.getString("action"))){
+                System.out.println("but comes here");
+                sessionHandler.sendImage(userId, jsonObject);
             }
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();

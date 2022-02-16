@@ -1,19 +1,36 @@
 <html lang="html">
-<head><base target="_parent"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&amp;display=swap"><link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/bootstrap.min.css"><link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/mdb.min.css"><link rel="stylesheet" href="https://mdbootstrap.com/wp-content/themes/mdbootstrap4/docs-app/css/compiled-addons-4.20.0.min.css"><style type="text/css">
-@-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}</style>
-    <title id="title"></title></head>
-<body data-new-gr-c-s-check-loaded="14.1047.0" data-gr-ext-installed="">
-<div id="snippetContent">
+<head>
+    <base target="_parent">
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-    <link   rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
-    <link   href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
-    <link   href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js">
-    </script>
-    <link  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&amp;display=swap"/>
+    <link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://mdbootstrap.com/api/snippets/static/download/MDB-Pro_4.20.0/css/mdb.min.css"/>
+    <link rel="stylesheet" href="https://mdbootstrap.com/wp-content/themes/mdbootstrap4/docs-app/css/compiled-addons-4.20.0.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <!-- Cropper -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/0.8.1/cropper.min.js"></script>
+    <!-- Cropper -->
+    <link href="style.css" rel="stylesheet">
     <script src="websocket.js"></script>
+    <script src="effects.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+            crossorigin="anonymous">
+    </script>
+    <title id="title"></title>
+</head>
+<body data-new-gr-c-s-check-loaded="14.1047.0" data-gr-ext-installed="">
+
+<div id="snippetContent">
+
 <!--    <div class="container">-->
         <div class="row clearfix">
             <div class="col-lg-12">
@@ -22,8 +39,8 @@
                         <ul class="notificationsbtn nav navbar-nav navbar-right">
                             <li id="notificationsli">
                                 <a onclick="viewNotification()" id="notifications" href="#" id="drop3" role="button" class="dropdown-toggle" data-toggle="dropdown">
-                                        <span class="fa-stack fa-2x"> <!-- onclick="viewNotification()"-->
-                                            <i  class="fas fa-bell fa-2x"></i>
+                                    <span class="fa-stack fa-2x"> <!-- onclick="viewNotification()"-->
+                                        <i  class="fas fa-bell fa-2x"></i>
                                             <span  class="badge" id="badge"></span>  <!-- Notification Count -->
                                         </span></a>
                                 <div id="notification-container" class="dropdown-menu" role="menu" aria-labelledby="drop3" style="position: absolute;transform: translate3d(0px, 86px, 0px);top: 0px;left: 0px;will-change: transform;width: fit-content;">
@@ -45,7 +62,7 @@
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">
-                                    <i href="#" class="fas fa-user-plus fa-2x" onclick="addFriend()"></i>
+                                    <i href="#" class="fas fa-user-plus fa-2x" style="cursor: pointer" onclick="addFriend()"></i>
                                 </span>
                             </div>
                             <label>
@@ -57,6 +74,9 @@
                     </ul>
                     </div>
                     <div class="chat">
+                        <!-- Opens the Overlay window for the multimedia -->
+                        <span style="font-size:30px; cursor:pointer" onclick="openNav()">&#9776;</span>
+                        <!-- Opens the Overlay window for the multimedia -->
                         <div class="chat-header clearfix">
                             <form action="logout" method="post">
                             <button class="logout button" type="submit">Log out</button>
@@ -76,21 +96,61 @@
                             <div class="input-group mb-0">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">
-                                        <i class="fa fa-send fa-2x" onclick="sendMessage()"></i>
+                                        <i class="fa fa-send fa-2x" style="cursor: pointer" onclick="sendMessage()"></i>
                                     </span>
                                 </div>
                                 <label>
                                     <input id="messageToSend" type="text" class="form-control" placeholder="Enter text here...">
                                 </label>
                             </div>
-                            <i class="fa fa-paperclip" type="file" id="paperClip" accept="image/*" style="font-size:36px;"></i>
+
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-<!--    </div>-->
+    </div>
+
+<!-- Image Sender Overlay Portion starts -->
+<div id="myNav" class="menuOverlay">
+    <a href="javascript:void(0)" class="closeBtn" onclick="closeNav()">&times;</a>
+    <div class="menuOverlay-content">
+        <div class="container page">
+            <div class="form-group container">
+                <label for="file-input">Upload Image File:</label>
+                <input class="form-control box" accept="image/*" type="file" required id="file-input" />
+
+               <!-- <input class="form-control box" accept="image/*" type="file" required id="file-input" />
+                <i class="paperClip" onclick="document.getElementById('file-input').click()">Images</i> -->
+
+            </div>
+            <div class="box-2">
+                <div class="result"></div>
+            </div>
+            <!-- right box -->
+            <div class="box-2 img-result hide">
+                <!-- result of crop -->
+                <img class="cropped" src="" alt="" />
+            </div>
+            <!-- input file -->
+            <div class="box">
+                <div class="options hide">
+                    <label> Width</label>
+                    <input type="number" class="img-w" value="300" min="100" max="1200" />
+                </div>
+                <!-- save btn -->
+                <button class="btn save hide">Save</button>
+                <!-- download btn -->
+                <a onclick="return sendImage(this)" id="croppedImg" href="" class="btn download hide">Send Image</a>
+            </div>
+        </div>
+    </div>
 </div>
+<!--Image Sender Overlay Portion ends -->
+
+<!-- Overlay for the requests starts here -->
+
 <div id="overlay" onclick="overlayOff()">
     <div id="fb">
         <div id="fb-top">
@@ -104,525 +164,65 @@
     </div>
 </div>
 
+<!-- Overlay for the requests ends here -->
+
 </body>
-<style type="text/css">
-    button.logout.button {
-        position: absolute;
-        right: 20;
-        background: lightblue;
-        border-block-color: white;
-    }
-    body{
-    background-color: #f4f7f6;
-        width: max-content;
-        height: max-content;
-    /*margin-top:20px;*/
-}
-    body {
-        /*padding-top: 50px;*/
-        /*padding-right:100px;*/
-    }
-
-
-    .starter-template {
-        padding: 40px 15px;
-        text-align: center;
-    }
-
-    a {
-        color: #428bca;
-    }
-
-    a:hover {
-        color: #D65C4F;
-        text-decoration: none;
-    }
-
-    #notification-list {
-        width: 300px;
-        max-height: 400px;
-        overflow-y: scroll;
-    }
-
-    .dropdown-menu > .panel {
-        border: none;
-        margin: 0px 0;
-        width: max-content;
-    }
-
-    .panel-heading {
-        background-color: #f1f1f1;
-        border-bottom: 1px solid #dedede;
-    }
-
-    .activity-item i {
-        float: left;
-        margin-top: 3px;
-        font-size: 16px;
-    }
-
-    div.activity {
-        margin-left: 28px;
-    }
-
-    div.activity-item {
-        padding: 7px 12px;
-    }
-
-    #notification-list div.activity-item {
-        border-top: 1px solid #f5f5f5;
-    }
-
-    #notification-list div.activity-item a {
-        font-weight: 600;
-    }
-
-    div.activity span {
-        display: block;
-        color: #999;
-        font-size: 11px;
-        line-height: 16px;
-    }
-
-    #notifications i.fa {
-        font-size: 17px;
-    }
-
-    .noty_type_error * {
-        font-weight: normal !important;
-    }
-
-    .noty_type_error a {
-        font-weight: bold !important;
-    }
-
-    .noty_bar.noty_type_error a, .noty_bar.noty_type_error i {
-        color: #fff
-    }
-
-    .noty_bar.noty_type_information a {
-        color: #fff;
-        font-weight: bold;
-    }
-
-    .noty_type_error div.activity span
-    {
-        color: #fff
-    }
-
-    .noty_type_information div.activity span
-    {
-        color: #fefefe
-    }
-
-    .no-notification {
-        padding: 10px 5px;
-        text-align: center;
-    }
-
-    .noty-manager-wrapper {
-        position: relative;
-        display: inline-block !important;
-    }
-
-    .noty-manager-bubble
-    {
-        position: absolute;
-        top: -8px;
-        background-color: #89bfde;
-        color: #fff;
-        padding: 2px 5px !important;
-        font-size: 9px;
-        line-height: 12px;
-        text-align: center;
-        white-space: nowrap;
-        vertical-align: baseline;
-        cursor: pointer;
-        height: 15px;
-        font-weight: bold;
-
-        border-radius: 2px;
-        -moz-border-radius: 2px;
-        -webkit-border-radius: 2px;
-        box-shadow:1px 1px 1px rgba(0,0,0,.1);
-        opacity: 0;
-    }
-.badge{
-    position: relative;
-    margin-left: -40%;
-    margin-top: -60%;
-}
-.card {
-    background: #f3ecec;
-    transition: .5s;
-    border: 0;
-    /*margin-bottom: 30px;*/
-    border-radius: .55rem;
-    position: fixed;
-    width: 100%;
-    height:max-content;
-
-
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 10%);
-}
-    #fb{
-        width:500px;
-        border:1px solid gray;
-        border-radius:5px;
-        height:175px;
-        background:white;
-        position: absolute;
-        top:300;
-        bottom: 0;
-        left: 550;
-        right: 0;
-    }
-    #fb p{
-        font-family:sans-serif;
-        margin: 0 0 0 10px;
-        line-height:30px;
-    }
-
-    #fb-top span{
-        color: #5684e1;
-        float:right;
-        margin-right:10px;
-    }
-    #fb-top{
-        background-color:#efefef;
-        height:30px;
-        width:500px;
-        border-radius:5px 5px 0 0;
-        position:absolute;
-        top:-1px;
-        left:-1px;
-        border:1px solid gray;
-    }
-
-    #fb img{
-        position:absolute;
-        left:10px;
-        top:53px;
-    }
-
-    #info{
-        position:absolute;
-        left:120px;
-        top:75px;
-    }
-
-    #info {
-        color: #5e7dbd;
-        line-height:25px;
-        font-size:18px;
-    }
-
-    #info span{
-        color:#777;
-        font-size:14px;
-    }
-
-    #button-block{
-        position:absolute;
-        right:10px;
-        top:85px;
-    }
-
-    #button-block div{
-        display:inline-block;
-    }
-
-    #popWindowButton, #delete{
-        background-color:#4267B2;
-        color:white;
-        padding:7px;
-        border-radius:2px;
-        margin-right:10px;
-        font-family:sans-serif;
-    }
-
-    #delete{
-        color:#222;
-        background-color:#bbb;
-        border:1px solid #999;
-        padding:6px;
-        margin-right:0;
-    }
-
-    #button-block div:hover{
-        opacity:.8;
-        cursor:pointer;
-    }
-    #overlay {
-        position : absolute;
-        display: none;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0,0,0,0.5);
-        z-index: 2;
-        cursor: pointer;
-    }
-
-    #text{
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        font-size: 50px;
-        color: white;
-        transform: translate(-50%,-50%);
-        -ms-transform: translate(-50%,-50%);
-    }
-    .chat-app .people-list {
-    width: 280px;
-    position: absolute;
-    left: 0;
-    top: 0;
-    padding: 20px;
-    z-index: 7
-}
-
-.chat-app .chat {
-    margin-left: 280px;
-    border-left: 1px solid #eaeaea
-}
-
-.people-list {
-    -moz-transition: .5s;
-    -o-transition: .5s;
-    -webkit-transition: .5s;
-    transition: .5s
-}
-
-.people-list .chat-list li {
-    padding: 10px 15px;
-    list-style: none;
-    border-radius: 3px
-}
-
-.people-list .chat-list li:hover {
-    background: #efefef;
-    cursor: pointer
-}
-
-.people-list .chat-list li.active {
-    background: #efefef
-}
-
-.people-list .chat-list li .name {
-    font-size: 15px
-}
-
-.people-list .chat-list img {
-    width: 45px;
-    border-radius: 50%
-}
-
-.people-list img {
-    float: left;
-    border-radius: 50%
-}
-
-.people-list .about {
-    float: left;
-    padding-left: 8px
-}
-
-.people-list .status {
-    color: #999;
-    font-size: 13px
-}
-
-.chat .chat-header {
-    padding: 15px 20px;
-    border-bottom: 2px solid #f4f7f6;
-    height: 100px;
-    background: #ded3d3;
-}
-
-.chat .chat-header img {
-    float: left;
-    border-radius: 40px;
-    width: 40px
-}
-
-.chat .chat-header .chat-about {
-    float: left;
-    padding-left: 10px
-}
-
-.chat .chat-history {
-    background: #ffffff;
-    border-bottom: 2px solid #ffffff;
-    height: 410px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    text-align: center;
-    padding: 20px;
-}
-
-.chat .chat-history ul {
-    padding: 0
-}
-
-.chat .chat-history ul li {
-    list-style: none;
-    margin-bottom: 30px
-}
-
-.chat .chat-history ul li:last-child {
-    margin-bottom: 0px
-}
-
-.chat .chat-history .message-data {
-    margin-bottom: 15px
-}
-
-.chat .chat-history .message-data img {
-    border-radius: 40px;
-    width: 40px
-}
-
-.chat .chat-history .message-data-time {
-    color: #434651;
-    padding-left: 6px
-}
-
-.chat .chat-history .message {
-    color: #444;
-    padding: 18px 20px;
-    line-height: 26px;
-    font-size: 16px;
-    border-radius: 7px;
-    display: inline-block;
-    position: relative
-}
-
-.chat .chat-history .message:after {
-    bottom: 100%;
-    left: 7%;
-    content: " ";
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-    border: 10px solid transparent;
-    border-bottom-color: #fff;
-    margin-left: -10px
-}
-
-.chat .chat-history .my-message {
-    background: #efefef;
-    right: 400;
-}
-
-.chat .chat-history .my-message:after {
-    bottom: 100%;
-    left: 30px;
-    content: " ";
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-    border: 10px solid transparent;
-    border-bottom-color: #efefef;
-    margin-left: -10px
-}
-
-.chat .chat-history .other-message {
-    background: #e8f1f3;
-    text-align: right
-}
-
-.chat .chat-history .other-message:after {
-    border-bottom-color: #e8f1f3;
-    left: 93%
-}
-
-.chat .chat-message {
-    padding: 20px
-}
-
-.online,
-.offline,
-.me {
-    margin-right: 2px;
-    font-size: 8px;
-    vertical-align: middle
-}
-
-.online {
-    color: #86c541
-}
-
-.offline {
-    color: #e47297
-}
-
-.me {
-    color: #1d8ecd
-}
-
-.float-right {
-    float: right
-}
-
-.clearfix:after {
-    visibility: hidden;
-    display: block;
-    font-size: 0;
-    content: " ";
-    clear: both;
-    height: 0
-}
-
-@media only screen and (max-width: 767px) {
-    .chat-app .people-list {
-        height: 465px;
-        width: 100%;
-        overflow-x: auto;
-        background: #fff;
-        left: -400px;
-        display: none
-    }
-    .chat-app .people-list.open {
-        left: 0
-    }
-    .chat-app .chat {
-        margin: 0
-    }
-    .chat-app .chat .chat-header {
-        border-radius: 0.55rem 0.55rem 0 0
-    }
-    .chat-app .chat-history {
-        height: 300px;
-        overflow-x: auto
-    }
-}
-
-@media only screen and (min-width: 768px) and (max-width: 992px) {
-    .chat-app .chat-list {
-        height: 650px;
-        overflow-x: auto
-    }
-    .chat-app .chat-history {
-        height: 600px;
-        overflow-x: auto
-    }
-}
-
-@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) and (-webkit-min-device-pixel-ratio: 1) {
-    .chat-app .chat-list {
-        height: 480px;
-        overflow-x: auto
-    }
-    .chat-app .chat-history {
-        height: calc(100vh - 350px);
-        overflow-x: auto
-    }
-}
-</style>
+<script>
+    // vars
+    let result = document.querySelector(".result"),
+        img_result = document.querySelector(".img-result"),
+        img_w = document.querySelector(".img-w"),
+        img_h = document.querySelector(".img-h"),
+        options = document.querySelector(".options"),
+        save = document.querySelector(".save"),
+        cropped = document.querySelector(".cropped"),
+        dwn = document.querySelector(".download"),
+        upload = document.querySelector("#file-input"),
+        cropper = "";
+
+    // on change show image with crop options
+    upload.addEventListener("change", (e) => {
+        if (e.target.files.length) {
+            // start file reader
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (e.target.result) {
+                    // create new image
+                    let img = document.createElement("img");
+                    img.id = "image";
+                    img.src = e.target.result;
+                    // clean result before
+                    result.innerHTML = "";
+                    // append new image
+                    result.appendChild(img);
+                    // show save btn and options
+                    save.classList.remove("hide");
+                    options.classList.remove("hide");
+                    // init cropper
+                    cropper = new Cropper(img);
+                }
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // save on click
+    save.addEventListener("click", (e) => {
+        e.preventDefault();
+        // get result to data uri
+        let imgSrc = cropper
+            .getCroppedCanvas({
+                width: img_w.value, // input value
+            })
+            .toDataURL();
+        // remove hide class of img
+        cropped.classList.remove("hide");
+        img_result.classList.remove("hide");
+        // show image cropped
+        cropped.src = imgSrc;
+        dwn.classList.remove("hide");
+        dwn.download = "imagename.png";
+        dwn.setAttribute("href", imgSrc);
+    });
+</script>
 </html>

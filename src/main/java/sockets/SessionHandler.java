@@ -13,7 +13,6 @@ import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +22,9 @@ public class SessionHandler {
     JDBC db = new JDBC();
     private int recentChatModelId = 0;
     private int notificationModelId = 0;
+
     private static final HashMap<String, Session> sessions = new HashMap<>();
+
     public void addSession(Session session, String userId) throws SQLException, ClassNotFoundException {
         sessions.put(userId, session);
         System.out.println("Session add to Hash for "+ userId);
@@ -47,11 +48,27 @@ public class SessionHandler {
 
     }
     public void removeSession(Session session, String userId) throws SQLException, ClassNotFoundException {
-        System.out.println(userId + " has left the App, being removed");
         db.dml("UPDATE public.\"USERS\" SET active='offline' WHERE \"ID\"='"+ userId +"';");
-        pingAllFriends(userId, "wentOffline");
         sessions.entrySet().removeIf(entry -> session.equals(entry.getValue()));
     }
+    private void sendToSession(Session session, JsonObject message) throws SQLException, ClassNotFoundException {
+        String userid = "";
+        try{
+            session.getBasicRemote().sendText(message.toString());
+        } catch (IOException e) {
+            for (Map.Entry<String, Session> set : sessions.entrySet()){
+                if (session.equals(set.getValue())){
+                    userid = set.getKey();
+                    break;
+                }
+            }
+            removeSession(session, userid);
+            Logger.getLogger(SessionHandler.class.getName()).log(Level.SEVERE, null, e);
+        }
+    }
+
+
+
     private List<NotificationModel> createNotificationModels(String userId) throws SQLException, ClassNotFoundException {
         ResultSet notificationResultSet = db.dql("SELECT * from public.\"NOTIFICATION\" where \"RECIPIENT_ID\"='"+userId+"' or \"SENDER_ID\"='"+userId+"'");
         List<NotificationModel> notificationModels = new ArrayList<>();
@@ -114,6 +131,12 @@ public class SessionHandler {
                 .build();
         return addMessage;
     }
+
+
+
+
+
+
     private List<RecentChatModel> createRecentChatModels(String userId) throws SQLException, ClassNotFoundException {
         final List<RecentChatModel> recentChatModels = new ArrayList<>();
         ResultSet friendListResultSet = db.dql("SELECT \"FRIENDS\" FROM public.\"USERS\" WHERE \"ID\"='" + userId + "' ");
@@ -150,6 +173,7 @@ public class SessionHandler {
                 .build();
         return message;
     }
+
     public void addChatModels(String userId, String friendId, Session session) throws SQLException, ClassNotFoundException {
 
         final List<ChatModel> chatModels = createChatModels(userId, friendId);
@@ -158,11 +182,12 @@ public class SessionHandler {
             sendToSession(session, addMessage);
         }
     }
-    private ChatModel createChatModel(String data, String from, String time){
+    private ChatModel createChatModel(String data, String from, String time, String type){
         ChatModel chatModel = new ChatModel();
         chatModel.setData(data);
         chatModel.setFrom(from);
         chatModel.setTime(time);
+        chatModel.setType(type);
         return chatModel;
     }
     private List<ChatModel> createChatModels(String userId, String friendId) throws SQLException, ClassNotFoundException {
@@ -171,7 +196,6 @@ public class SessionHandler {
         // SELECT * FROM public."MESSAGES" WHERE (("FROM"='BRUCE' OR "FROM"='ALICE') AND ("TO"='BRUCE' OR "TO"='ALICE'));
         while (chatModelsResultSet.next()){
             String data = chatModelsResultSet.getString(4);
-            System.out.println(data);
             String from;
             if (chatModelsResultSet.getString(1).equals(userId)){
                 from = "you";
@@ -179,36 +203,24 @@ public class SessionHandler {
                 from = "friend";
             }
             String time = chatModelsResultSet.getString(3);
-            chatModels.add(createChatModel(data, from, time));
+            String type = chatModelsResultSet.getString(5);
+            chatModels.add(createChatModel(data, from, time, type));
         }
         System.out.println();
         return chatModels;
     }
     private JsonObject createAddChatMessage(ChatModel chatModel){
-        JsonProvider provider = JsonProvider.provider();
-        JsonObject message = provider.createObjectBuilder()
+        return  JsonProvider.provider().createObjectBuilder()
                 .add("action","viewChat")
                 .add("data",chatModel.getData())
                 .add("from",chatModel.getFrom())
                 .add("time",chatModel.getTime())
+                .add("type",chatModel.getType())
                 .build();
-        return message;
+
     }
-    private void sendToSession(Session session, JsonObject message) throws SQLException, ClassNotFoundException {
-        String userid = "";
-        try{
-            session.getBasicRemote().sendText(message.toString());
-        } catch (IOException e) {
-            for (Map.Entry<String, Session> set : sessions.entrySet()){
-                if (session.equals(set.getValue())){
-                    userid = set.getKey();
-                    break;
-                }
-            }
-            removeSession(session, userid);
-            Logger.getLogger(SessionHandler.class.getName()).log(Level.SEVERE, null, e);
-        }
-    }
+
+
     public void sendMessage(String userId, JsonObject jsonObject) throws SQLException, ClassNotFoundException {
         String friendId = jsonObject.getString("friendId");
         String message = jsonObject.getString("message");
@@ -218,15 +230,45 @@ public class SessionHandler {
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
-        JsonObject addMessage1 = createAddChatMessage(createChatModel(message,"you",time));
+        JsonObject addMessage1 = createAddChatMessage(createChatModel(message,"you",time, "chat"));
         sendToSession(sessions.get(userId),addMessage1);
         try {
-            JsonObject addMessage2 = createAddChatMessage(createChatModel(message, "friend", time));
+            JsonObject addMessage2 = createAddChatMessage(createChatModel(message, "friend", time, "chat"));
             sendToSession(sessions.get(friendId), addMessage2);
         }catch (NullPointerException e){
             System.out.println(friendId + "is Offline");
         }
     }
+    public void sendImage(String userId, JsonObject jsonObject) throws SQLException, ClassNotFoundException {
+
+        String friendId = jsonObject.getString("friendId");
+        String time = jsonObject.getString("time");
+        String data = jsonObject.getString("encoded");
+
+        try {
+            db.dml("INSERT INTO \"MESSAGES\" VALUES ('" + userId + "','" + friendId + "','" + time + "','" + data + "','image');");
+        }catch (Exception e){
+            System.out.println("Db error at the image sending");
+        }
+        try {
+            sendToSession(sessions.get(friendId),
+                    createAddChatMessage(createChatModel(
+                            data,
+                            "friend",
+                            time,
+                            "image")));
+        }catch (NullPointerException e){
+            System.out.println(friendId + " is Offline");
+        }
+
+        sendToSession(sessions.get(userId),
+                createAddChatMessage(createChatModel(
+                        data,
+                        "you",
+                        time,
+                        "image")));
+    }
+
     public void addFriendWindow(String userId, JsonObject jsonObject, Session session) throws SQLException, ClassNotFoundException {
         String friendId = jsonObject.getString("friendId");
         if (!friendId.equals("")){
