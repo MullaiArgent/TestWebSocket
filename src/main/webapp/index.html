@@ -15,11 +15,10 @@
     <!-- Cropper -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/2.3.4/cropper.min.css"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/0.8.1/cropper.min.js"></script>
     <!-- Cropper -->
     <link href="style.css" rel="stylesheet">
     <script src="websocket.js"></script>
-    <script src="effects.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
@@ -27,6 +26,7 @@
     </script>
     <title id="title"></title>
 </head>
+
 <body data-new-gr-c-s-check-loaded="14.1047.0" data-gr-ext-installed="">
 
 <div id="snippetContent">
@@ -103,8 +103,6 @@
                                     <input id="messageToSend" type="text" class="form-control" placeholder="Enter text here...">
                                 </label>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -118,12 +116,7 @@
     <div class="menuOverlay-content">
         <div class="container page">
             <div class="form-group container">
-                <label for="file-input">Upload Image File:</label>
-                <input class="form-control box" accept="image/*" type="file" required id="file-input" />
-
-               <!-- <input class="form-control box" accept="image/*" type="file" required id="file-input" />
-                <i class="paperClip" onclick="document.getElementById('file-input').click()">Images</i> -->
-
+                <input class="form-control box" accept="image/*" type="file" required id="file-input"/>
             </div>
             <div class="box-2">
                 <div class="result"></div>
@@ -131,17 +124,22 @@
             <!-- right box -->
             <div class="box-2 img-result hide">
                 <!-- result of crop -->
-                <img class="cropped" src="" alt="" />
+                <canvas id="canvas1"
+                        width="200"
+                        height="200"
+                        style="border: 1px solid black;"
+                ></canvas>
+
             </div>
             <!-- input file -->
             <div class="box">
                 <div class="options hide">
-                    <label> Width</label>
-                    <input type="number" class="img-w" value="300" min="100" max="1200" />
+                    <input type="number" class="img-w" value="300" min="100" max="1200" hidden/>
                 </div>
                 <!-- save btn -->
                 <button class="btn save hide">Save</button>
                 <!-- download btn -->
+                <button id="clear">Clear</button>
                 <a onclick="return sendImage(this)" id="croppedImg" href="" class="btn download hide">Send Image</a>
             </div>
         </div>
@@ -165,8 +163,10 @@
 </div>
 
 <!-- Overlay for the requests ends here -->
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/0.8.1/cropper.min.js"></script>
+<script src="media.js"></script>
 </body>
+
 <script>
     // vars
     let result = document.querySelector(".result"),
@@ -175,13 +175,13 @@
         img_h = document.querySelector(".img-h"),
         options = document.querySelector(".options"),
         save = document.querySelector(".save"),
-        cropped = document.querySelector(".cropped"),
+        cropped = document.getElementById("canvas1"),
         dwn = document.querySelector(".download"),
         upload = document.querySelector("#file-input"),
         cropper = "";
 
-    // on change show image with crop options
     upload.addEventListener("change", (e) => {
+
         if (e.target.files.length) {
             // start file reader
             const reader = new FileReader();
@@ -205,24 +205,25 @@
             reader.readAsDataURL(e.target.files[0]);
         }
     });
-
     // save on click
-    save.addEventListener("click", (e) => {
-        e.preventDefault();
+    let image;
+    save.addEventListener("click", (event) => {
+        event.preventDefault();
         // get result to data uri
-        let imgSrc = cropper
-            .getCroppedCanvas({
+        let imgSrc = cropper.getCroppedCanvas({
                 width: img_w.value, // input value
-            })
-            .toDataURL();
+            }).toDataURL();
         // remove hide class of img
         cropped.classList.remove("hide");
         img_result.classList.remove("hide");
         // show image cropped
-        cropped.src = imgSrc;
+        image = document.createElement("img");
+        image.src = imgSrc;
         dwn.classList.remove("hide");
-        //dwn.download = "imagename.png";
         dwn.setAttribute("href", imgSrc);
+        image.addEventListener("load", () => {
+            drawOnImage(image, dwn);
+        });
     });
 </script>
 </html>

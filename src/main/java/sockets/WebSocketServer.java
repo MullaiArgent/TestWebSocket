@@ -75,7 +75,6 @@ public class WebSocketServer {
                 sessionHandler.notificationsViewed(userId);
             }
             if ("sendImage".equals(jsonObject.getString("action"))){
-                System.out.println("but comes here");
                 sessionHandler.sendImage(userId, jsonObject);
             }
         } catch (SQLException | ClassNotFoundException e) {
