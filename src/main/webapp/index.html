@@ -18,7 +18,6 @@
     <!-- Cropper -->
     <link href="style.css" rel="stylesheet">
     <script src="websocket.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
@@ -26,11 +25,8 @@
     </script>
     <title id="title"></title>
 </head>
-
 <body data-new-gr-c-s-check-loaded="14.1047.0" data-gr-ext-installed="">
-
 <div id="snippetContent">
-
 <!--    <div class="container">-->
         <div class="row clearfix">
             <div class="col-lg-12">
@@ -83,7 +79,6 @@
                             </form>
                             <div class="row">
                                 <div id="about" class="col-lg-6">
-
                                 </div>
                             </div>
                         </div>
@@ -109,7 +104,6 @@
             </div>
         </div>
     </div>
-
 <!-- Image Sender Overlay Portion starts -->
 <div id="myNav" class="menuOverlay">
     <a href="javascript:void(0)" class="closeBtn" onclick="closeNav()">&times;</a>
@@ -121,34 +115,26 @@
             <div class="box-2">
                 <div class="result"></div>
             </div>
-            <!-- right box -->
             <div class="box-2 img-result hide">
-                <!-- result of crop -->
                 <canvas id="canvas1"
                         width="200"
                         height="200"
                         style="border: 1px solid black;"
                 ></canvas>
-
             </div>
-            <!-- input file -->
             <div class="box">
                 <div class="options hide">
                     <input type="number" class="img-w" value="300" min="100" max="1200" hidden/>
                 </div>
-                <!-- save btn -->
                 <button class="btn save hide">Save</button>
-                <!-- download btn -->
-                <button id="clear">Clear</button>
+                <button id="clear" class="btn clear hide">Clear</button>
                 <a onclick="return sendImage(this)" id="croppedImg" href="" class="btn download hide">Send Image</a>
             </div>
         </div>
     </div>
 </div>
 <!--Image Sender Overlay Portion ends -->
-
 <!-- Overlay for the requests starts here -->
-
 <div id="overlay" onclick="overlayOff()">
     <div id="fb">
         <div id="fb-top">
@@ -161,62 +147,56 @@
         </div>
     </div>
 </div>
-
 <!-- Overlay for the requests ends here -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/0.8.1/cropper.min.js"></script>
 <script src="media.js"></script>
 </body>
-
 <script>
     // vars
     let result = document.querySelector(".result"),
         img_result = document.querySelector(".img-result"),
         img_w = document.querySelector(".img-w"),
-        img_h = document.querySelector(".img-h"),
         options = document.querySelector(".options"),
         save = document.querySelector(".save"),
+        clear = document.querySelector(".clear"),
         cropped = document.getElementById("canvas1"),
         dwn = document.querySelector(".download"),
         upload = document.querySelector("#file-input"),
         cropper = "";
-
     upload.addEventListener("change", (e) => {
-
         if (e.target.files.length) {
-            // start file reader
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 if (e.target.result) {
-                    // create new image
+
                     let img = document.createElement("img");
                     img.id = "image";
                     img.src = e.target.result;
-                    // clean result before
-                    result.innerHTML = "";
-                    // append new image
+
+                    result.innerHTML = "";   // clean result before
+
                     result.appendChild(img);
-                    // show save btn and options
+
                     save.classList.remove("hide");
+
                     options.classList.remove("hide");
-                    // init cropper
+
                     cropper = new Cropper(img);
                 }
             };
             reader.readAsDataURL(e.target.files[0]);
         }
     });
-    // save on click
     let image;
     save.addEventListener("click", (event) => {
         event.preventDefault();
-        // get result to data uri
         let imgSrc = cropper.getCroppedCanvas({
-                width: img_w.value, // input value
+                width: img_w.value,
             }).toDataURL();
-        // remove hide class of img
         cropped.classList.remove("hide");
+        clear.classList.remove("hide");
         img_result.classList.remove("hide");
-        // show image cropped
         image = document.createElement("img");
         image.src = imgSrc;
         dwn.classList.remove("hide");

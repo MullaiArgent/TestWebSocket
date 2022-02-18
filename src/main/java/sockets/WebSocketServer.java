@@ -20,6 +20,10 @@ public class WebSocketServer {
     private final SessionHandler sessionHandler = new SessionHandler();
     String userId;
     HttpSession httpSession;
+
+    public WebSocketServer() throws ClassNotFoundException, SQLException {
+    }
+
     @OnOpen
     public void open(Session session, EndpointConfig config) throws SQLException, ClassNotFoundException {
         httpSession = (HttpSession) config.getUserProperties().get(HttpSession.class.getName());

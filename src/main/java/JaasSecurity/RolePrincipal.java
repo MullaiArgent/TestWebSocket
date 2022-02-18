@@ -9,13 +9,6 @@ class RolePrincipal implements Principal, Serializable {
 
     private String name;
 
-    @Override
-    public String toString() {
-        return "RolePrincipal{" +
-                "name='" + name + '\'' +
-                '}';
-    }
-
     public RolePrincipal(String name) {
         this.name = name;
     }

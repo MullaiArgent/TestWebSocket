@@ -9,13 +9,6 @@ class UserPrincipal implements Principal, Serializable {
 
     private String name;
 
-    @Override
-    public String toString() {
-        return "UserPrincipal{" +
-                "name='" + name + '\'' +
-                '}';
-    }
-
     public UserPrincipal(String name) {
         super();
         this.name = name;

@@ -19,6 +19,10 @@ public class InvitationMailer {
     static String host = "smtp.gmail.com";
     static String user = "mullairajan2000@gmail.com";
     JDBC db = new JDBC();
+
+    public InvitationMailer() throws ClassNotFoundException, SQLException {
+    }
+
     public void mailer(String userId, JsonObject jsonObject){
     Properties properties = new Properties();
         properties.put("mail.smtp.auth","true");
@@ -49,7 +53,13 @@ public class InvitationMailer {
         sessionHandler.addInvitedNotification(userId, jsonObject);
 
         try {
-            db.dml("insert into public.\"NOTIFICATION\" values('"+ friendId +"','"+ userId +"','invitation',now(),FALSE);");
+            StringBuilder insertNotification = new StringBuilder();
+            insertNotification.append("insert into public.\"NOTIFICATION\" values('");
+            insertNotification.append(friendId);
+            insertNotification.append("','");
+            insertNotification.append(userId);
+            insertNotification.append("','invitation',now(),FALSE);");
+            db.dml(insertNotification.toString());
             // To avoid the reUsability of the Token
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();

@@ -14,6 +14,9 @@ public class RegisterGoogleUser extends HttpServlet {
 
     JDBC db = new JDBC();
 
+    public RegisterGoogleUser() throws ClassNotFoundException, SQLException {
+    }
+
     @Override
     public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
         System.out.println("coming here inside the g reg");
@@ -29,7 +32,18 @@ public class RegisterGoogleUser extends HttpServlet {
         profilePic = req.getParameter("picture");
 
         try {
-            db.dml("INSERT INTO public.\"USERS\" VALUES ('" + userId + "','" + fullName + "','" + profilePic + "','{}','" + userId + "');");
+            StringBuilder insertGoogleUser = new StringBuilder();
+            insertGoogleUser.append("INSERT INTO public.\"USERS\" VALUES ('");
+            insertGoogleUser.append(userId);
+            insertGoogleUser.append("','");
+            insertGoogleUser.append(fullName);
+            insertGoogleUser.append("','");
+            insertGoogleUser.append(profilePic);
+            insertGoogleUser.append("','{}','");
+            insertGoogleUser.append(userId);
+            insertGoogleUser.append("');");
+
+            db.dml(insertGoogleUser.toString());
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }

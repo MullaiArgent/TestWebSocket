@@ -23,6 +23,9 @@ import java.util.Objects;
 @WebServlet(urlPatterns = "/createAccount")
 public class CreateAccountController extends HttpServlet {
 
+    public CreateAccountController() throws ClassNotFoundException, SQLException {
+    }
+
     private String getValue(String jwt, String key){
         StringBuilder val = new StringBuilder();
         for (int i = 0; i < jwt.length();i++){
@@ -61,22 +64,45 @@ public class CreateAccountController extends HttpServlet {
             String friendIdJwt = getValue(String.valueOf(jwt), "friendId");
             session.setAttribute("userIdJwt",userIdJwt);
             session.setAttribute("friendIdJwt",friendIdJwt);
+            ResultSet rs = null;
             try {
+                StringBuilder queryNotification = new StringBuilder();
+                queryNotification.append("SELECT * FROM public.\"NOTIFICATION\" WHERE \"RECIPIENT_ID\"='");
+                queryNotification.append(friendIdParameter);
+                queryNotification.append("' AND \"SENDER_ID\"='");
+                queryNotification.append(userIdJwt);
+                queryNotification.append("';");
 
-                ResultSet rs = db.dql("SELECT * FROM public.\"NOTIFICATION\" WHERE \"RECIPIENT_ID\"='" + friendIdParameter + "' AND \"SENDER_ID\"='" + userIdJwt + "';");
+                rs = db.dql(queryNotification.toString());
                 while (rs.next()) {
                     invited = true;
                 }
+                rs.close();
             } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
 
             if (invited && (friendIdJwt.equals(friendIdParameter))) {
                 addUSer(req);
+
+
                 try {
-                    db.dml("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '" + friendIdParameter + "') where \"ID\"='" + userIdJwt + "';");
-                    //db.dml("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '" + userIdJwt + "') where \"ID\"='" + friendIdParameter + "';");
-                    db.dml("UPDATE public.\"NOTIFICATION\" set \"ACTIVITY_TYPE\" = 'friends' where \"RECIPIENT_ID\"='"+ friendIdParameter +"' and \"SENDER_ID\"='"+ userIdJwt +"';");
+                    StringBuilder updateUser = new StringBuilder();
+                    updateUser.append("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '");
+                    updateUser.append(friendIdParameter);
+                    updateUser.append("') where \"ID\"='");
+                    updateUser.append(userIdJwt);
+                    updateUser.append("';");
+
+                    StringBuilder updateNotification = new StringBuilder();
+                    updateNotification.append("UPDATE public.\"NOTIFICATION\" set \"ACTIVITY_TYPE\" = 'friends' where \"RECIPIENT_ID\"='");
+                    updateNotification.append(friendIdParameter);
+                    updateNotification.append("' and \"SENDER_ID\"='");
+                    updateNotification.append(userIdJwt);
+                    updateNotification.append("';");
+
+                    db.dml(updateUser.toString());
+                    db.dml(updateNotification.toString());
                     res.sendRedirect("app");
 
                 } catch (ClassNotFoundException | SQLException e) {
@@ -112,9 +138,34 @@ public class CreateAccountController extends HttpServlet {
             mail_id = req.getParameter("mail_id");
             if (password.equals(re_password)) {
                 try {
-                    db.dml("INSERT INTO public.\"USERS\" VALUES ('" + userId + "','" + fullName + "','" + profilePic + "','{"+ session.getAttribute("userIdJwt")+"}', '"+mail_id+"');");
-                    db.addUser("INSERT INTO users VALUES ('" + userId + "','" + password + "')");
-                    db.addUser("INSERT INTO users_roles VALUES ('" + userId + "','user')");
+                    StringBuilder insertUser = new StringBuilder();
+                    insertUser.append("INSERT INTO public.\"USERS\" VALUES ('");
+                    insertUser.append(userId);
+                    insertUser.append("','");
+                    insertUser.append(fullName);
+                    insertUser.append("','");
+                    insertUser.append(profilePic);
+                    insertUser.append("','{");
+                    insertUser.append(session.getAttribute("userIdJwt"));
+                    insertUser.append("}', '");
+                    insertUser.append(mail_id);
+                    insertUser.append("');");
+                    db.dml(insertUser.toString());
+
+                    StringBuilder insertUserName = new StringBuilder();
+                    insertUserName.append("INSERT INTO users VALUES ('");
+                    insertUserName.append(userId);
+                    insertUserName.append("','");
+                    insertUserName.append(password);
+                    insertUserName.append("')");
+                    db.addUser(insertUserName.toString());
+
+                    StringBuilder insertUserRole = new StringBuilder();
+                    insertUserRole.append("INSERT INTO users_roles VALUES ('");
+                    insertUserRole.append(userId);
+                    insertUserRole.append("','user')");
+
+                    db.addUser(insertUserRole.toString());
                 } catch (ClassNotFoundException | SQLException e) {
                     e.printStackTrace();
                 }

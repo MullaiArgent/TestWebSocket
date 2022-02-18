@@ -15,7 +15,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Key;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Base64;
 
 @WebServlet(urlPatterns = "/invitation")
@@ -23,7 +23,12 @@ public class InvitationController extends HttpServlet {
     @Override
     public void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        JDBC db = new JDBC();
+        JDBC db = null;
+        try {
+            db = new JDBC();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
         String token = request.getParameter("token");
         PrintWriter out = response.getWriter();
         HttpSession session = request.getSession();
@@ -39,7 +44,8 @@ public class InvitationController extends HttpServlet {
                         .setSigningKey(hmacKey)
                         .build()
                         .parseClaimsJws(token);
-                ResultSet rs = db.dql("select * from public.\"USERS\" where \"ID\" = '"+getValue(String.valueOf(jwt))+"';");
+                //ResultSet rs = db.dql("select * from public.\"USERS\" where \"ID\" = '"+getValue(String.valueOf(jwt))+"';");
+                // TODO
                 RequestDispatcher rd = request.getRequestDispatcher("register");
                 rd.forward(request, response);
 
