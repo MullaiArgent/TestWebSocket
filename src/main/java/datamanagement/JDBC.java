@@ -29,12 +29,9 @@ public class JDBC {
     }
 
     public void addUser(String query) throws ClassNotFoundException, SQLException {
-        String url = "jdbc:mysql://localhost/tomcatusers";
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection con = DriverManager.getConnection(url, "tom", "testpassword");
         Statement st = con.createStatement();
         st.executeUpdate(query);
-        con.close();
+        //con.close();
     }
 }
 
