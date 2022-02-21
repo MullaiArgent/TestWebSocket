@@ -158,14 +158,14 @@ public class CreateAccountController extends HttpServlet {
                     insertUserName.append("','");
                     insertUserName.append(password);
                     insertUserName.append("')");
-                    db.addUser(insertUserName.toString());
+                    db.dml(insertUserName.toString());
 
                     StringBuilder insertUserRole = new StringBuilder();
                     insertUserRole.append("INSERT INTO users_roles VALUES ('");
                     insertUserRole.append(userId);
                     insertUserRole.append("','user')");
 
-                    db.addUser(insertUserRole.toString());
+                    db.dml(insertUserRole.toString());
                 } catch (ClassNotFoundException | SQLException e) {
                     e.printStackTrace();
                 }

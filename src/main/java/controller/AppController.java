@@ -15,6 +15,10 @@ public class AppController extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
         HttpSession session = req.getSession();
         session.setAttribute("userId",req.getRemoteUser());
+        session.setAttribute("scheme",req.getScheme());
+        session.setAttribute("serverName",req.getServerName());
+        session.setAttribute("serverPort",req.getServerPort()+"");
+
         RequestDispatcher rd = req.getRequestDispatcher("index.html");
         rd.forward(req, res);
     }

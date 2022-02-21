@@ -14,13 +14,20 @@ import javax.json.JsonObject;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.mail.Session;
+import javax.servlet.http.HttpServletRequest;
 
 public class InvitationMailer {
     static String host = "smtp.gmail.com";
     static String user = "mullairajan2000@gmail.com";
+    String scheme;
+    String serverName;
+    String serverPort;
     JDBC db = new JDBC();
 
-    public InvitationMailer() throws ClassNotFoundException, SQLException {
+    public InvitationMailer(String scheme, String serverName, String serverPort) throws ClassNotFoundException, SQLException {
+        this.scheme =scheme;
+        this.serverPort=serverPort;
+        this.serverName=serverName;
     }
 
     public void mailer(String userId, JsonObject jsonObject){
@@ -41,9 +48,17 @@ public class InvitationMailer {
 
         }
     });
+    StringBuilder url = new StringBuilder();
+    url.append(scheme);
+    url.append("://");
+    url.append(serverName);
+    url.append(":");
+    url.append(serverPort);
+    url.append("/TestWebSocket_war/invitation?token=");
+    url.append(generateInvitationToken(userId, friendId));
 
-        String invitationUrl = "http://localhost:8080/TestWebSocket_war/invitation?token="+ generateInvitationToken(userId, friendId);
-        Message message = prepareMessage(session, friendId, userId, invitationUrl);
+        //String invitationUrl = "http://localhost:8080/TestWebSocket_war/invitation?token="+ generateInvitationToken(userId, friendId);
+        Message message = prepareMessage(session, friendId, userId, url.toString());
 
         try {
         assert message != null;

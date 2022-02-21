@@ -6,6 +6,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -20,18 +23,25 @@ public class WebSocketServer {
     private final SessionHandler sessionHandler = new SessionHandler();
     String userId;
     HttpSession httpSession;
+    String scheme;
+    String serverName;
+    String serverPort;
 
-    public WebSocketServer() throws ClassNotFoundException, SQLException {
-    }
+    public WebSocketServer() throws ClassNotFoundException, SQLException {}
 
     @OnOpen
     public void open(Session session, EndpointConfig config) throws SQLException, ClassNotFoundException {
         httpSession = (HttpSession) config.getUserProperties().get(HttpSession.class.getName());
         userId = (String) httpSession.getAttribute("userId");
-        sessionHandler.addSession(session, userId);
+        scheme = (String) httpSession.getAttribute("scheme");
+        serverPort = (String) httpSession.getAttribute("serverPort");
+        serverName = (String) httpSession.getAttribute("serverName");
         String token = (String) httpSession.getAttribute("invitationToken");
         String userIdJwt = (String) httpSession.getAttribute("userIdJwt");
         String friendIdJwt = (String) httpSession.getAttribute("friendIdJwt");
+
+        sessionHandler.addSession(session, userId);
+
         if ((token != null) && (userIdJwt != null) && (friendIdJwt != null)) {
             sessionHandler.invitationAccepted(userIdJwt, friendIdJwt);
             httpSession.removeAttribute("invitationToken");
@@ -40,7 +50,7 @@ public class WebSocketServer {
         }
     }
     @OnClose
-    public void close(Session session) throws SQLException, ClassNotFoundException {
+    public void close(Session session) {
         sessionHandler.removeSession(session, userId);
     }
     @OnError
@@ -54,32 +64,34 @@ public class WebSocketServer {
             if ("viewChat".equals(jsonObject.getString("action"))){
                 sessionHandler.addChatList(userId, jsonObject.getString("friendId"), session);
             }
-            if ("sendMessage".equals(jsonObject.getString("action"))){
+            else if ("sendMessage".equals(jsonObject.getString("action"))){
                 sessionHandler.sendMessage(userId, jsonObject);
             }
-            if ("addFriend".equals(jsonObject.getString("action"))){
+            else if ("addFriend".equals(jsonObject.getString("action"))){
                 sessionHandler.addFriendWindow(userId, jsonObject, session);
             }
-            if ("friendRequest".equals(jsonObject.getString("action"))){
+            else if ("friendRequest".equals(jsonObject.getString("action"))){
                 sessionHandler.sendFriendRequest(userId, jsonObject.getString("friendId"), session);
             }
-            if ("invitation".equals(jsonObject.getString("action"))){
-                new InvitationMailer().mailer(userId, jsonObject);
+            else if ("invitation".equals(jsonObject.getString("action"))){
+                new InvitationMailer(scheme, serverName, serverPort).mailer(userId, jsonObject);
             }
-            if ("cancelOutGoingFriendRequest".equals(jsonObject.getString("action"))){
+            else if ("cancelOutGoingFriendRequest".equals(jsonObject.getString("action"))){
                 sessionHandler.cancelOutGoingFriendRequest(userId,jsonObject);
             }
-            if ("cancelIncomingFriendRequest".equals(jsonObject.getString("action"))){
+            else if ("cancelIncomingFriendRequest".equals(jsonObject.getString("action"))){
                 sessionHandler.cancelIncomingFriendRequest(userId,jsonObject);
             }
-            if ("confirmFriendRequest".equals(jsonObject.getString("action"))){
+            else if ("confirmFriendRequest".equals(jsonObject.getString("action"))){
                 sessionHandler.confirmFriendRequest(userId, jsonObject.getString("friendId"), session);
             }
-            if ("notificationsViewed".equals(jsonObject.getString("action"))){
+            else if ("notificationsViewed".equals(jsonObject.getString("action"))){
                 sessionHandler.notificationsViewed(userId);
             }
-            if ("sendImage".equals(jsonObject.getString("action"))){
+            else if ("sendImage".equals(jsonObject.getString("action"))){
                 sessionHandler.sendImage(userId, jsonObject);
+            }else{
+                System.out.println("Invalid message from the Client");
             }
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();

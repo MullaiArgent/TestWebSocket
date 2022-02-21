@@ -18,6 +18,7 @@
 <!-- The contents of this file will be loaded for each web application -->
 <Context>
     <Realm className="org.apache.catalina.realm.CombinedRealm">
+
         <Realm className="org.apache.catalina.realm.JDBCRealm"
                driverName="org.postgresql.Driver"
                connectionURL="jdbc:postgresql://localhost/chat?user=postgres&amp;password=@TeslaPostgresql2000"

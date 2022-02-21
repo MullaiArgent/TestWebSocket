@@ -2,6 +2,7 @@ window.onload = init;
 const socket = new WebSocket("ws://localhost:8080/TestWebSocket_war/actions");
 socket.onmessage = onMessage;
 let globalFriendId = "";
+let myid;
 
 function init(){
 
@@ -199,6 +200,9 @@ function removeChat(){
 }
 function onMessage(event) {
     const message = JSON.parse(event.data);
+    if (message.action === "userId"){
+        document.getElementById("title").innerHTML = message.userId;
+    }
     if (message.action === "addRecentChatModel") {
         printRecentChats(message);
     }
@@ -297,10 +301,13 @@ function onMessage(event) {
         overlayOn();
     }
     if (message.action === "newNotification") {
+        notify()
+        console.log("comes here")
         const badge = document.getElementById("badge");
         badge.innerHTML = parseInt(badge.innerHTML) + 1;
     }
     if (message.action === "addNotification") {
+        console.log("but here via the addnotification")
         printNotification(message);
     }
     if (message.action === "removeNotification"){
@@ -459,4 +466,7 @@ function sendImage(item) {
         socket.send(JSON.stringify(chatAction))
         console.log("sending image to" + globalFriendId)
     }
+}
+function notify(){
+    document.getElementById("notificationAudio").play();
 }

@@ -22,11 +22,8 @@ public final class GoogleOAuth {
 
 
     private static final String CLIENT_ID = "695410172015-vhklf7dmroggoktcdmmhgmvaanmaj2t2.apps.googleusercontent.com";
-
     private static final String CLIENT_SECRET = "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";
-
     private static final String CALLBACK_URI = "http://localhost:8080/TestWebSocket_war/app";
-
     // start google authentication constants
     private static final Iterable<String> SCOPE = Arrays.asList("https://www.googleapis.com/auth/userinfo.profile;https://www.googleapis.com/auth/userinfo.email".split(";"));
     private static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo";

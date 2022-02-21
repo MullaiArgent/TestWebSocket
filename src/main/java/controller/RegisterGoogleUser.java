@@ -19,7 +19,6 @@ public class RegisterGoogleUser extends HttpServlet {
 
     @Override
     public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        System.out.println("coming here inside the g reg");
         String userId;
         String fullName;
         String profilePic;
@@ -44,9 +43,10 @@ public class RegisterGoogleUser extends HttpServlet {
             insertGoogleUser.append("');");
 
             db.dml(insertGoogleUser.toString());
+
+            res.sendRedirect("app");
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
-        res.sendRedirect("app");
     }
 }

@@ -17,11 +17,7 @@ import java.util.logging.Logger;
 public class SessionHandler {
     JDBC db = new JDBC();
     private static final HashMap<String, Session> sessions = new HashMap<>();
-
-    public SessionHandler() throws ClassNotFoundException, SQLException {
-
-    }
-
+    public SessionHandler() throws ClassNotFoundException, SQLException {}
     private void sendToSession(Session session, JsonObject message) {
         String userid = "";
         try{
@@ -218,6 +214,18 @@ public class SessionHandler {
     public void addSession(Session session, String userId) {
         sessions.put(userId, session);
         try {
+            sendToSession(session, JsonProvider.
+                    provider()
+                    .createObjectBuilder()
+                    .add("action", "userId")
+                    .add("userId", userId)
+                    .build());
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Exception while sending the userId");
+        }
+
+        try {
             StringBuilder updateUser = new StringBuilder();
             updateUser.append("UPDATE public.\"USERS\" SET active='online' WHERE \"ID\"='");
             updateUser.append(userId);
@@ -363,7 +371,7 @@ public class SessionHandler {
         friendsQuery.append("SELECT \"FRIENDS\" FROM public.\"USERS\" WHERE \"ID\"='");
         friendsQuery.append(userId);
         friendsQuery.append("'");
-        if (!friendId.equals("")){
+        if (friendId.length() != 0){
             ResultSet addFriendResultSet = db.dql("SELECT \"ID\",\"PROFILEPIC\" FROM public.\"USERS\"");
         while (addFriendResultSet.next()) {
             if (addFriendResultSet.getString(1).equals(friendId)) {
