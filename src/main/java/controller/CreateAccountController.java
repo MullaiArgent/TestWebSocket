@@ -5,7 +5,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -78,14 +77,12 @@ public class CreateAccountController extends HttpServlet {
                     invited = true;
                 }
                 rs.close();
-            } catch (SQLException | ClassNotFoundException e) {
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
 
             if (invited && (friendIdJwt.equals(friendIdParameter))) {
                 addUSer(req);
-
-
                 try {
                     StringBuilder updateUser = new StringBuilder();
                     updateUser.append("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '");
@@ -103,6 +100,7 @@ public class CreateAccountController extends HttpServlet {
 
                     db.dml(updateUser.toString());
                     db.dml(updateNotification.toString());
+                    db.close();
                     res.sendRedirect("app");
 
                 } catch (ClassNotFoundException | SQLException e) {
@@ -114,6 +112,7 @@ public class CreateAccountController extends HttpServlet {
             }
         } else {
             addUSer(req);
+            db.close();
             res.sendRedirect("app");
         }
     }

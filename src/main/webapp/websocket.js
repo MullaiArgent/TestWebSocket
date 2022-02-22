@@ -1,8 +1,8 @@
 window.onload = init;
 const socket = new WebSocket("ws://localhost:8080/TestWebSocket_war/actions");
 socket.onmessage = onMessage;
-let globalFriendId = "";
-let myid;
+let globalFriendId;
+let globalUserId;
 
 function init(){
 
@@ -202,6 +202,8 @@ function onMessage(event) {
     const message = JSON.parse(event.data);
     if (message.action === "userId"){
         document.getElementById("title").innerHTML = message.userId;
+        globalUserId = message.userId;
+
     }
     if (message.action === "addRecentChatModel") {
         printRecentChats(message);
@@ -214,8 +216,7 @@ function onMessage(event) {
             printImage(message);
         }}
     if (message.action === "notificationCount") {
-        const Count = document.getElementById("badge");
-        Count.innerHTML = message.notificationCount;
+        document.getElementById("badge").innerHTML = message.notificationCount;
     }
     if (message.action === "addFriendWindow") {
         const windowType = document.getElementById("forProfile");
@@ -307,15 +308,13 @@ function onMessage(event) {
         badge.innerHTML = parseInt(badge.innerHTML) + 1;
     }
     if (message.action === "addNotification") {
-        console.log("but here via the addnotification")
         printNotification(message);
     }
     if (message.action === "removeNotification"){
         removeNotification(message);
     }
     if (message.action === "backOnline"){
-        const status = document.getElementById("status"+message.friendId);
-        status.innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + "online";
+        document.getElementById("status"+message.friendId).innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + "online";
 
         const aboutStatus = document.getElementById("aboutStatus"+message.friendId)
         if (aboutStatus !== null) {
@@ -323,8 +322,7 @@ function onMessage(event) {
         }
     }
     if (message.action === "wentOffline"){
-        const status = document.getElementById("status"+message.friendId);
-            status.innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + "offline";
+        document.getElementById("status"+message.friendId).innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + "offline";
         const aboutStatus = document.getElementById("aboutStatus"+message.friendId);
         if (aboutStatus !== null) {
             aboutStatus.innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + "offline";
@@ -332,8 +330,7 @@ function onMessage(event) {
     }
 }
 function removeLabel(){
-    const chatAbout = document.getElementById("about");
-    chatAbout.innerHTML = ""
+    document.getElementById("about").innerHTML = ""
 }
 function applyTheLabel(friendId){
     removeLabel();
@@ -428,12 +425,11 @@ function confirmFriendRequest(friendId) {
 function addFriend() {
     const friendId = document.getElementById("addFriend").value;
     document.getElementById("addFriend").value = "";
-    const ChatAction = {
-        action: "addFriend",
-        friendId: friendId
-    };
-    if (friendId !== "") {
-
+    if (friendId !== "" && friendId !== globalUserId) {
+        const ChatAction = {
+            action: "addFriend",
+            friendId: friendId
+        };
         socket.send(JSON.stringify(ChatAction));
     }
 }

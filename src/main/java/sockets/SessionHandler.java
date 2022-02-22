@@ -644,4 +644,7 @@ public class SessionHandler {
         }
         friendListResultSet.close();
     }
+    public void close(){
+        db.close();
+    }
 }

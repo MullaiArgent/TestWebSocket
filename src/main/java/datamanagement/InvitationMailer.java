@@ -3,7 +3,6 @@ package datamanagement;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import sockets.SessionHandler;
-
 import java.security.Key;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -14,7 +13,6 @@ import javax.json.JsonObject;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.mail.Session;
-import javax.servlet.http.HttpServletRequest;
 
 public class InvitationMailer {
     static String host = "smtp.gmail.com";

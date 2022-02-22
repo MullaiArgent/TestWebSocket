@@ -6,9 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -52,10 +49,12 @@ public class WebSocketServer {
     @OnClose
     public void close(Session session) {
         sessionHandler.removeSession(session, userId);
+        sessionHandler.close();
     }
     @OnError
     public void error(Throwable error){
         Logger.getLogger(WebSocketServer.class.getName()).log(Level.SEVERE, null, error);
+        sessionHandler.close();
     }
     @OnMessage(maxMessageSize = 1048576)
     public void handleMessage(String message, Session session){
