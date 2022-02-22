@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Key;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
 
@@ -44,8 +45,16 @@ public class InvitationController extends HttpServlet {
                         .setSigningKey(hmacKey)
                         .build()
                         .parseClaimsJws(token);
-                //ResultSet rs = db.dql("select * from public.\"USERS\" where \"ID\" = '"+getValue(String.valueOf(jwt))+"';");
-                // TODO
+               // ResultSet rs = db.dql("select * from public.\"USERS\" where \"ID\" = '"+getValue(String.valueOf(jwt))+"';");
+                assert db != null;
+                ResultSet rs = db.dql("SELECT * FROM public.\"USERS\" WHERE \"ID\" = '"+getValue(String.valueOf(jwt))+"';");
+                boolean verifyInvitation = true;
+                while (rs.next()){
+                    verifyInvitation = false;
+                }
+                if (verifyInvitation){
+                    throw new Exception();
+                }
                 RequestDispatcher rd = request.getRequestDispatcher("register");
                 rd.forward(request, response);
 
@@ -58,7 +67,7 @@ public class InvitationController extends HttpServlet {
     private String getValue(String jwt){
         StringBuilder val = new StringBuilder();
         for (int i = 0; i < jwt.length();i++){
-            if (jwt.charAt(i)== "friendId".charAt(0)){
+            if (jwt.charAt(i) == "friendId".charAt(0)){
                 if (jwt.startsWith("friendId", i)){
                     i += "friendId".length()+1;
                     while(jwt.charAt(i)!=','){

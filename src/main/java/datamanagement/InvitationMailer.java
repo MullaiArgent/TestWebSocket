@@ -74,7 +74,7 @@ public class InvitationMailer {
             insertNotification.append("','invitation',now(),FALSE);");
             db.dml(insertNotification.toString());
             // To avoid the reUsability of the Token
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     } catch (MessagingException | SQLException | ClassNotFoundException e) {

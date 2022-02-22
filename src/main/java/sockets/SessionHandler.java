@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class SessionHandler {
     JDBC db = new JDBC();
     private static final HashMap<String, Session> sessions = new HashMap<>();
-    public SessionHandler() throws ClassNotFoundException, SQLException {}
+    public SessionHandler() throws SQLException, ClassNotFoundException {}
     private void sendToSession(Session session, JsonObject message) {
         String userid = "";
         try{
@@ -31,9 +31,10 @@ public class SessionHandler {
             }
             removeSession(session, userid);
             Logger.getLogger(SessionHandler.class.getName()).log(Level.SEVERE, null, e);
+            System.out.println("Theres an Exception while sending a packet to the Session");
         }
     }
-    private void initialNotificationList(Session session, String userId) throws SQLException {
+    private void initialNotificationList(Session session, String userId) {
         StringBuilder notificationQuery = new StringBuilder();
         notificationQuery.append("SELECT * from public.\"NOTIFICATION\" where \"RECIPIENT_ID\"='");
         notificationQuery.append(userId);
@@ -48,72 +49,128 @@ public class SessionHandler {
             System.out.println("Theres an exception while querying the notification");
         }
         assert notificationResultSet != null;
-        while (notificationResultSet.next()){
-            String sender;
-            String receiver;
-            String activityType;
-            String time;
-            boolean seen;
-            receiver = notificationResultSet.getString(1);
-            sender = notificationResultSet.getString(2);
-            if (notificationResultSet.getString(3).equals("friendRequest")) {
-                if (userId.equals(notificationResultSet.getString(2))) {
-                    activityType = "friendRequestSent";
+        try {
+            while (notificationResultSet.next()) {
+                String sender;
+                String receiver;
+                String activityType;
+                String time;
+                boolean seen;
+                receiver = notificationResultSet.getString(1);
+                sender = notificationResultSet.getString(2);
+                if (notificationResultSet.getString(3).equals("friendRequest")) {
+                    if (userId.equals(notificationResultSet.getString(2))) {
+                        activityType = "friendRequestSent";
+                    } else {
+                        activityType = "friendRequestReceived";
+                    }
+                } else if (notificationResultSet.getString(3).equals("friends")) {
+                    activityType = notificationResultSet.getString(3);
+                    if (userId.equals(notificationResultSet.getString(1))) {
+                        receiver = notificationResultSet.getString(2);
+                        sender = notificationResultSet.getString(2);
+                    } else {
+                        receiver = notificationResultSet.getString(1);
+                        sender = notificationResultSet.getString(1);
+                    }
                 } else {
-                    activityType = "friendRequestReceived";
+                    activityType = notificationResultSet.getString(3);
                 }
-            } else if (notificationResultSet.getString(3).equals("friends")){
-                activityType = notificationResultSet.getString(3);
-                if (userId.equals(notificationResultSet.getString(1))) {
-                    receiver = notificationResultSet.getString(2);
-                    sender = notificationResultSet.getString(2);
-                }else {
-                    receiver = notificationResultSet.getString(1);
-                    sender = notificationResultSet.getString(1);
+                time = notificationResultSet.getString(4);
+                seen = notificationResultSet.getBoolean(5);
+                try {
+                    sendToSession(session, createANotification(sender, receiver, activityType, time, seen));
+                }catch (Exception e){
+                    e.printStackTrace();
+                    System.out.println("Theres an Exception at your End, Unable perform few Operations");
                 }
-            }
-            else {
-                activityType = notificationResultSet.getString(3);
-            }
-            time = notificationResultSet.getString(4);
-            seen = notificationResultSet.getBoolean(5);
-            sendToSession(session, createANotification(sender, receiver, activityType, time, seen));
 
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres an Exception while Iterating the Notification ResultSet");
         }
-        notificationResultSet.close();
+        try {
+            notificationResultSet.close();
+        }catch (Exception e1){
+            e1.printStackTrace();
+            System.out.println("Theres an Exception while closing the Notification ResulSet \n Retrying...");
+            try{
+                notificationResultSet.close();
+            }catch (Exception e2){
+                e2.printStackTrace();
+                System.out.println("ResultSet Failed to Close");
+            }
+        }
     }
-    private void initialRecentChatList(Session session, String userId) throws SQLException, ClassNotFoundException {
+    private void initialRecentChatList(Session session, String userId) {
         String profile = "";
         String active = "";
         StringBuilder friendsQuery = new StringBuilder();
         friendsQuery.append("SELECT \"FRIENDS\" FROM public.\"USERS\" WHERE \"ID\"='");
         friendsQuery.append(userId);
         friendsQuery.append("'");
-        ResultSet friendListResultSet = db.dql(friendsQuery.toString());
-        while (friendListResultSet.next()){
-            Array friends;
-            String[] friendsArray = new String[0];
-            if (!friendListResultSet.getString(1).equals("{}")){
-                friends = friendListResultSet.getArray(1);
-                friendsArray = (String[])friends.getArray();
-
-            }
-            for (String friendId : friendsArray) {
-                StringBuilder profileQuery = new StringBuilder();
-                profileQuery.append("SELECT \"PROFILEPIC\",\"active\" FROM public.\"USERS\" WHERE \"ID\"='");
-                profileQuery.append(friendId);
-                profileQuery.append("';");
-                ResultSet profileResultSet = db.dql(profileQuery.toString());
-                while (profileResultSet.next()) {
-                    profile = profileResultSet.getString(1);
-                    active = profileResultSet.getString(2);
+        ResultSet friendListResultSet = null;
+        try {
+            friendListResultSet = db.dql(friendsQuery.toString());
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Exception while querying the ResultSet of the FriendList");
+        }
+        try {
+            while (true) {
+                assert friendListResultSet != null;
+                if (!friendListResultSet.next()) break;
+                Array friends;
+                String[] friendsArray = new String[0];
+                if (!friendListResultSet.getString(1).equals("{}")) {
+                    friends = friendListResultSet.getArray(1);
+                    friendsArray = (String[]) friends.getArray();
 
                 }
-                profileResultSet.close();
-                sendToSession(session, createARecentChat(friendId, active, profile));
+                for (String friendId : friendsArray) {
+                    String profileQuery = "SELECT \"PROFILEPIC\",\"active\" FROM public.\"USERS\" WHERE \"ID\"='" + friendId + "';";
+                    ResultSet profileResultSet = db.dql(profileQuery);
+                    while (profileResultSet.next()) {
+                        profile = profileResultSet.getString(1);
+                        active = profileResultSet.getString(2);
+
+                    }
+                    try {
+                        profileResultSet.close();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        System.out.println("Theres is problem in Closing the ResultSet \n Retrying...");
+                        try{
+                            profileResultSet.close();
+                        }catch (Exception e1){
+                            e.printStackTrace();
+                            System.out.println("ResultSet Failed to Close");
+                        }
+                    }
+                    try {
+                        sendToSession(session, createARecentChat(friendId, active, profile));
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        System.out.println("Theres an Exception at your End, Unable perform few Operations");
+                    }
+                }
+            }
+        }catch (Exception e){
+            System.out.println("Theres an Exception while iterating the FriendList ResultSet");
+        }
+        try {
+            friendListResultSet.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres an Exception while closing the ResultSet \n Retrying...");
+            try{
+                friendListResultSet.close();
+            }catch (Exception e2){
+                e2.printStackTrace();
+                System.out.println("Connection Not Closed");
             }
         }
-        friendListResultSet.close();
     }
     private JsonObject createANotification(String sender, String receiver, String activityType,String time, boolean seen){
         return JsonProvider
@@ -129,15 +186,17 @@ public class SessionHandler {
 
     }
     private JsonObject createAddNotificationCount(int notificationCount) {
-        JsonProvider provider = JsonProvider.provider();
-        JsonObject addMessage = provider.createObjectBuilder()
+        return JsonProvider
+                .provider()
+                .createObjectBuilder()
                 .add("action", "notificationCount")
                 .add("notificationCount",notificationCount)
                 .build();
-        return addMessage;
     }
     private JsonObject createARecentChat(String friendId, String active, String profile){
-        return JsonProvider.provider().createObjectBuilder()
+        return JsonProvider
+                .provider()
+                .createObjectBuilder()
                 .add("action","addRecentChatModel")
                 .add("name",friendId)
                 .add("active",active)
@@ -145,7 +204,9 @@ public class SessionHandler {
                 .build();
     }
     private JsonObject createAddChatMessage(String data, String from, String time, String type){
-        return  JsonProvider.provider().createObjectBuilder()
+        return  JsonProvider
+                .provider()
+                .createObjectBuilder()
                 .add("action","viewChat")
                 .add("data",data)
                 .add("from",from)
@@ -155,40 +216,40 @@ public class SessionHandler {
 
     }
     public JsonObject createAlreadyAFriendWindowMessage(String friendId, String profile){
-        JsonProvider provider = JsonProvider.provider();
-        JsonObject message = provider.createObjectBuilder()
+        return JsonProvider
+                .provider()
+                .createObjectBuilder()
                 .add("action","chatWindow")
                 .add("friendId",friendId)
                 .add("profile", profile)
                 .build();
-        return message;
     }
     public JsonObject createFriendRequestWindowMessage(String friendId, String profile){
-        JsonProvider provider = JsonProvider.provider();
-        JsonObject message = provider.createObjectBuilder()
+        return JsonProvider
+                .provider()
+                .createObjectBuilder()
                 .add("action","addFriendWindow")
                 .add("friendId",friendId)
                 .add("profile",profile)
                 .build();
-        return message;
     }
     public JsonObject createInvitationWindowMessage(String friendId){
-        JsonProvider provider = JsonProvider.provider();
-        JsonObject message = provider.createObjectBuilder()
+        return JsonProvider
+                .provider()
+                .createObjectBuilder()
                 .add("action","invitationWindow")
                 .add("friendId",friendId)
                 .build();
-        return message;
     }
     public JsonObject createAlreadyInvitedWindowMessage(String friendId){
-        JsonProvider provider = JsonProvider.provider();
-        JsonObject message = provider.createObjectBuilder()
+        return JsonProvider
+                .provider()
+                .createObjectBuilder()
                 .add("action","alreadyInvited")
                 .add("friendId",friendId)
                 .build();
-        return message;
     }
-    private int getNotificationCount(String userId) throws SQLException {
+    private int getNotificationCount(String userId) {
         StringBuilder notificationQueryCount = new StringBuilder();
         notificationQueryCount.append("SELECT COUNT(*) FROM public.\"NOTIFICATION\" where (\"RECIPIENT_ID\"='");
         notificationQueryCount.append(userId);
@@ -203,35 +264,47 @@ public class SessionHandler {
             System.out.println();
         }
         int notificationCount = 0;
-        while (true){
-            assert notificationCountResultSet != null;
-            if (!notificationCountResultSet.next()) break;
-            notificationCount = notificationCountResultSet.getInt(1);
+        try {
+            while (true) {
+                assert notificationCountResultSet != null;
+                if (!notificationCountResultSet.next()) break;
+                notificationCount = notificationCountResultSet.getInt(1);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres an Exception while Iterating the Notification Count ResultSet");
         }
-        notificationCountResultSet.close();
+        try {
+            notificationCountResultSet.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres an Exception while closing the ResultSet \n Retrying...");
+            try{
+                notificationCountResultSet.close();
+            }catch (Exception e1){
+                System.out.println("ResultSet FAiled to Close");
+            }
+        }
         return notificationCount;
     }
     public void addSession(Session session, String userId) {
         sessions.put(userId, session);
         try {
-            sendToSession(session, JsonProvider.
-                    provider()
-                    .createObjectBuilder()
-                    .add("action", "userId")
-                    .add("userId", userId)
-                    .build());
+            sendToSession(session, JsonProvider
+                                    .provider()
+                                    .createObjectBuilder()
+                                    .add("action", "userId")
+                                    .add("userId", userId)
+                                    .build());
         }catch (Exception e){
             e.printStackTrace();
-            System.out.println("Exception while sending the userId");
+            System.out.println("Theres an Exception at your End, Unable perform few Operations");
         }
 
         try {
-            StringBuilder updateUser = new StringBuilder();
-            updateUser.append("UPDATE public.\"USERS\" SET active='online' WHERE \"ID\"='");
-            updateUser.append(userId);
-            updateUser.append("';");
-            db.dml(updateUser.toString());
-        } catch (SQLException | ClassNotFoundException e) {
+            String updateUser = "UPDATE public.\"USERS\" SET active='online' WHERE \"ID\"='" + userId + "';";
+            db.dml(updateUser);
+        } catch (SQLException e) {
             System.out.println("Exception while updating");
             e.printStackTrace();
         }
@@ -243,7 +316,7 @@ public class SessionHandler {
         try{
             initialRecentChatList(session, userId);
         }catch (Exception e){
-            System.out.println("Exception while initiating the Chatlist");
+            System.out.println("Exception while initiating the ChatList");
             e.printStackTrace();
         }
         try {
@@ -273,7 +346,7 @@ public class SessionHandler {
         }
         sessions.entrySet().removeIf(entry -> session.equals(entry.getValue()));
     }
-    public void addChatList(String userId, String friendId, Session session) throws SQLException, ClassNotFoundException {
+    public void addChatList(String userId, String friendId, Session session) {
         StringBuilder messageQuery = new StringBuilder();
         messageQuery.append("SELECT * FROM \"MESSAGES\" WHERE ((\"FROM\"='");
         messageQuery.append(userId);
@@ -284,145 +357,226 @@ public class SessionHandler {
         messageQuery.append("' OR \"TO\"='");
         messageQuery.append(userId);
         messageQuery.append("'));");
-        ResultSet chatModelsResultSet = db.dql(messageQuery.toString()); // chat data
         // SELECT * FROM public."MESSAGES" WHERE (("FROM"='BRUCE' OR "FROM"='ALICE') AND ("TO"='BRUCE' OR "TO"='ALICE'));
-        while (chatModelsResultSet.next()){
-            String data = chatModelsResultSet.getString(4);
-            String from;
-            if (chatModelsResultSet.getString(1).equals(userId)){
-                from = "you";
-            }else{
-                from = "friend";
-            }
-            String time = chatModelsResultSet.getString(3);
-            String type = chatModelsResultSet.getString(5);
-            sendToSession(session, createAddChatMessage(data, from, time, type));
+        ResultSet chatModelsResultSet = null;
+        try{
+            chatModelsResultSet = db.dql(messageQuery.toString()); // chat data
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres an Exception While Querying the ResultSet");
         }
-        chatModelsResultSet.close();
+        try {
+            while (true) {
+                assert chatModelsResultSet != null;
+                if (!chatModelsResultSet.next()) break;
+                String data = chatModelsResultSet.getString(4);
+                String from;
+                if (chatModelsResultSet.getString(1).equals(userId)) {
+                    from = "you";
+                } else {
+                    from = "friend";
+                }
+                String time = chatModelsResultSet.getString(3);
+                String type = chatModelsResultSet.getString(5);
+                try {
+                    sendToSession(session, createAddChatMessage(data, from, time, type));
+                }catch (Exception e){
+                    e.printStackTrace();
+                    System.out.println("Theres an Exception at your End, Unable perform few Operations");
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("theres an Exception While Iterating through ChatResultSet");
+        }
+        try {
+            chatModelsResultSet.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres an Exception while closing the ChatResultSet \n Retrying...");
+            try{
+                chatModelsResultSet.close();
+            }catch (Exception e1){
+                e1.printStackTrace();
+                System.out.println("ChatResultSet Failed to Close");
+            }
+        }
     }
-    public void sendMessage(String userId, JsonObject jsonObject) throws SQLException, ClassNotFoundException {
+    public void sendMessage(String userId, JsonObject jsonObject) {
         String friendId = jsonObject.getString("friendId");
         String message = jsonObject.getString("message");
         String time = jsonObject.getString("time");
         try {
-            StringBuilder pushAMessage = new StringBuilder();
-            pushAMessage.append("INSERT INTO \"MESSAGES\" VALUES ('");
-            pushAMessage.append(userId);
-            pushAMessage.append("','");
-            pushAMessage.append(friendId);
-            pushAMessage.append("','");
-            pushAMessage.append("now()");
-            pushAMessage.append("','");
-            pushAMessage.append(message);
-            pushAMessage.append("','chat');");
+            StringBuilder pushAMessage = new StringBuilder()
+                        .append("INSERT INTO \"MESSAGES\" VALUES ('")
+                        .append(userId)
+                        .append("','")
+                        .append(friendId)
+                        .append("','")
+                        .append("now()")
+                        .append("','")
+                        .append(message)
+                        .append("','chat');");
             db.dml(pushAMessage.toString());
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        JsonObject addMessage1 = createAddChatMessage(message,"you",time, "chat");
-        sendToSession(sessions.get(userId),addMessage1);
+        sendToSession(sessions.get(userId),createAddChatMessage(message,"you",time, "chat"));
         try {
-            JsonObject addMessage2 = createAddChatMessage(message, "friend", time, "chat");
-            sendToSession(sessions.get(friendId), addMessage2);
+            sendToSession(sessions.get(friendId), createAddChatMessage(message, "friend", time, "chat"));
         }catch (NullPointerException e){
             System.out.println(friendId + "is Offline");
         }
     }
-    public void sendImage(String userId, JsonObject jsonObject) throws SQLException, ClassNotFoundException {
+    public void sendImage(String userId, JsonObject jsonObject) {
         String friendId = jsonObject.getString("friendId");
         String time = jsonObject.getString("time");
         String data = jsonObject.getString("encoded");
 
         try {
-            StringBuilder insertImageMessage = new StringBuilder();
-            insertImageMessage.append("INSERT INTO \"MESSAGES\" VALUES ('");
-            insertImageMessage.append(userId);
-            insertImageMessage.append("','");
-            insertImageMessage.append(friendId);
-            insertImageMessage.append( "','");
-            insertImageMessage.append(time);
-            insertImageMessage.append("','");
-            insertImageMessage.append(data);
-            insertImageMessage.append("','image');");
+            StringBuilder insertImageMessage = new StringBuilder()
+                        .append("INSERT INTO \"MESSAGES\" VALUES ('")
+                        .append(userId)
+                        .append("','")
+                        .append(friendId)
+                        .append( "','")
+                        .append(time)
+                        .append("','")
+                        .append(data)
+                        .append("','image');");
             db.dml(insertImageMessage.toString());
         }catch (Exception e){
             System.out.println("Db error at the image sending");
         }
         try {
-            sendToSession(sessions.get(friendId),
-                    createAddChatMessage(
-                            data,
-                            "friend",
-                            time,
-                            "image"));
+            sendToSession(sessions.get(friendId), createAddChatMessage(data, "friend", time, "image"));
         }catch (NullPointerException e){
             System.out.println(friendId + " is Offline");
         }
-        sendToSession(sessions.get(userId),
-                createAddChatMessage(
-                        data,
-                        "you",
-                        time,
-                        "image"));
+        sendToSession(sessions.get(userId),createAddChatMessage(data, "you", time, "image"));
     }
-    public void addFriendWindow(String userId, JsonObject jsonObject, Session session) throws SQLException, ClassNotFoundException {
+    public void addFriendWindow(String userId, JsonObject jsonObject, Session session) {
         String friendId = jsonObject.getString("friendId");
         StringBuilder friendsQuery = new StringBuilder();
         friendsQuery.append("SELECT \"FRIENDS\" FROM public.\"USERS\" WHERE \"ID\"='");
         friendsQuery.append(userId);
         friendsQuery.append("'");
         if (friendId.length() != 0){
-            ResultSet addFriendResultSet = db.dql("SELECT \"ID\",\"PROFILEPIC\" FROM public.\"USERS\"");
-        while (addFriendResultSet.next()) {
-            if (addFriendResultSet.getString(1).equals(friendId)) {
-                String profile = addFriendResultSet.getString(2);
-                ResultSet friendListResultSet = db.dql(friendsQuery.toString());
-                while (friendListResultSet.next()) {
-                    Array friends;
-                    String[] friendsArray = new String[0];
-                    if (!friendListResultSet.getString(1).equals("{}")) {
-                        friends = friendListResultSet.getArray(1);
-                        friendsArray = (String[]) friends.getArray();
+            ResultSet addFriendResultSet = null;
+            try{
+                addFriendResultSet = db.dql("SELECT \"ID\",\"PROFILEPIC\" FROM public.\"USERS\"");
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Theres an Exception while querying the Friend Data");
+            }
+            try {
+                while (true) {
+                    assert addFriendResultSet != null;
+                    if (!addFriendResultSet.next()) break;
+                    if (addFriendResultSet.getString(1).equals(friendId)) {
+                        String profile = addFriendResultSet.getString(2);
+                        ResultSet friendListResultSet = db.dql(friendsQuery.toString());
+                        while (friendListResultSet.next()) {
+                            Array friends;
+                            String[] friendsArray;
+                            if (!friendListResultSet.getString(1).equals("{}")) {
+                                friends = friendListResultSet.getArray(1);
+                                friendsArray = (String[]) friends.getArray();
 
-                    } else {
+                            } else {
+                                JsonObject addMessage = createFriendRequestWindowMessage(friendId, profile);
+                                try {
+                                    sendToSession(session, addMessage); // has no friend, fd reqing
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                    System.out.println("Theres an Exception at your End, Unable perform few Operations");
+                                }
+                                return;
+                            }
+                            for (String friend : friendsArray) {
+                                if (friendId.equals(friend)) {
+                                    // are fds, chat window
+                                    JsonObject addMessage = createAlreadyAFriendWindowMessage(friendId, profile);
+                                    try {
+                                        sendToSession(session, addMessage);
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                        System.out.println("Theres an Exception at your End, Unable perform few Operations");
+                                    }
+                                    return;
+                                }
+                            }
+                        }
+                        friendListResultSet.close();
                         JsonObject addMessage = createFriendRequestWindowMessage(friendId, profile);
-                        sendToSession(session, addMessage); // has no friend, fd reqing
+                        try {
+                            sendToSession(session, addMessage); // not a friend, but a user so sends a req
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            System.out.println("Theres an Exception at your End, Unable perform few Operations");
+                        }
                         return;
                     }
-                    for (String friend : friendsArray) {
-                        if (friendId.equals(friend)) {
-                            // are fds, chat window
-                            JsonObject addMessage = createAlreadyAFriendWindowMessage(friendId, profile);
-                            sendToSession(session, addMessage);
-                            return;
-                        }
-                    }
                 }
-                friendListResultSet.close();
-                JsonObject addMessage = createFriendRequestWindowMessage(friendId, profile);
-                sendToSession(session, addMessage); // not a friend, but a user so sends a req
-                return;
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Theres an Exception while Iterating through Friend Data ResultSet");
             }
-        }
-            addFriendResultSet.close();
+            try {
+                addFriendResultSet.close();
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Theres an Exception while Closing the Friend Data ResultSet \n Retrying...");
+                try{
+                    addFriendResultSet.close();
+                }catch (Exception e1){
+                    System.out.println("FriendList ResultSet Failed to Close");
+                }
+            }
             // user does not exist, send Invitation
-        StringBuilder queryNotification = new StringBuilder();
-        queryNotification.append("SELECT * FROM public.\"NOTIFICATION\" where \"RECIPIENT_ID\" = '");
-        queryNotification.append(friendId);
-        queryNotification.append("' and \"SENDER_ID\" ='");
-        queryNotification.append(userId);
-        queryNotification.append("';");
-        ResultSet invitationResultSet = db.dql(queryNotification.toString());
-        System.out.println("from " + userId + " to " + friendId);
-        while (invitationResultSet.next()) {
-            System.out.println("inside the notification query");
-            sendToSession(session, createAlreadyInvitedWindowMessage(friendId));
-            return;
+            StringBuilder queryNotification = new StringBuilder();
+            queryNotification.append("SELECT * FROM public.\"NOTIFICATION\" where \"RECIPIENT_ID\" = '");
+            queryNotification.append(friendId);
+            queryNotification.append("' and \"SENDER_ID\" ='");
+            queryNotification.append(userId);
+            queryNotification.append("';");
+            ResultSet invitationResultSet = null;
+            try{
+                invitationResultSet = db.dql(queryNotification.toString());
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("theres an Exception while querying the ResultSet");
+            }
+            try {
+                sendToSession(session, createAlreadyInvitedWindowMessage(friendId));
+                return;
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Theres an Exception at your End, Unable perform few Operations");
+            }
+            try {
+                assert invitationResultSet != null;
+                invitationResultSet.close();
+            }catch (Exception e1){
+                e1.printStackTrace();
+                System.out.println("There Exception while Closing the ResultSet \n Retrying...");
+                try{
+                    invitationResultSet.close();
+                }catch (Exception e2){
+                    e2.printStackTrace();
+                    System.out.println("ResultSet Failed to Close");
+                }
+            }
+            JsonObject addMessage = createInvitationWindowMessage(friendId);
+            try {
+                sendToSession(session, addMessage);
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Theres an Exception at your End, Unable perform few Operations");
+            }
+        }else {
+            System.out.println("Empty String has been sent in the packet");
         }
-        invitationResultSet.close();
-        JsonObject addMessage = createInvitationWindowMessage(friendId);
-        sendToSession(session, addMessage);
-    }
     }
     public void sendFriendRequest(String userId, String friendId, Session session) throws SQLException, ClassNotFoundException {
         try {
@@ -433,7 +587,7 @@ public class SessionHandler {
             insertNotification.append(userId);
             insertNotification.append("','friendRequest',now(),FALSE);");
             db.dml(insertNotification.toString());
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         JsonProvider provider = JsonProvider.provider();
@@ -446,7 +600,11 @@ public class SessionHandler {
         }catch (Exception e){
             System.out.println(friendId + "is Offline");
         }
-        sendToSession(session, createANotification(userId, friendId, "friendRequestSent", "", true ));
+        try {
+            sendToSession(session, createANotification(userId, friendId, "friendRequestSent", "", true));
+        }catch (Exception e){
+            System.out.println("Theres an Exception at your End, Unable perform few Operations");
+        }
 
         try {
             sendToSession(sessions.get(friendId), createANotification(userId, friendId, "friendRequestReceived", "", true));
@@ -502,8 +660,24 @@ public class SessionHandler {
                 profile = profileResultSet1.getString(1);
                 active = profileResultSet1.getString(2);
             }
-            profileResultSet1.close();
-            sendToSession(session, createARecentChat(friendId,active, profile));
+            try {
+                profileResultSet1.close();
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Theres an Exception While Closing ResultSet");
+                try{
+                    profileResultSet1.close();
+                }catch (Exception e1){
+                    e1.printStackTrace();
+                    System.out.println("Failed to Close the ResultSet");
+                }
+            }
+            try {
+                sendToSession(session, createARecentChat(friendId, active, profile));
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Theres an Exception at your End, Unable perform few Operations");
+            }
             StringBuilder queryUserProfile = new StringBuilder();
             queryUserProfile.append("SELECT \"PROFILEPIC\",\"active\" FROM public.\"USERS\" WHERE \"ID\"='");
             queryUserProfile.append(userId);
@@ -513,14 +687,25 @@ public class SessionHandler {
                 profile = profileResultSet2.getString(1);
                 active = profileResultSet2.getString(2);
             }
-            profileResultSet2.close();
+            try {
+                profileResultSet2.close();
+            }catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Theres an Exception while Closing the ResultSetn \n Retrying...");
+                try{
+                    profileResultSet2.close();
+                }catch (Exception e1){
+                    e1.printStackTrace();
+                    System.out.println("Failed to Close the ResultSet");
+                }
+            }
             try {
                 sendToSession(sessions.get(friendId), createARecentChat(userId, active, profile));
             }catch (Exception e){
                 System.out.println(friendId + "is Offline");
             }
 
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -567,7 +752,7 @@ public class SessionHandler {
             System.out.println(friendId + "is Offile");
         }
     }
-    public void invitationAccepted(String userId, String friendId) throws SQLException, ClassNotFoundException {
+    public void invitationAccepted(String userId, String friendId) throws SQLException {
         String profile = "";
         String active = "";
         JsonProvider provider = JsonProvider.provider();
@@ -600,8 +785,24 @@ public class SessionHandler {
             profile = profileResultSet1.getString(1);
             active = profileResultSet1.getString(2);
         }
-        profileResultSet1.close();
-        sendToSession(sessions.get(userId), createARecentChat(friendId,active, profile ));
+        try {
+            profileResultSet1.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres a trouble Closing the ResultSet \n Retrying...");
+            try{
+                profileResultSet1.close();
+            }catch (Exception e1){
+                e1.printStackTrace();
+                System.out.println("Failed to Close the ResultSet");
+            }
+        }
+        try {
+            sendToSession(sessions.get(userId), createARecentChat(friendId, active, profile));
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres an Exception at your End, Unable perform few Operations");
+        }
     }
     public void notificationsViewed(String userId) throws SQLException, ClassNotFoundException {
         StringBuilder notificationViewdUpdate = new StringBuilder();
@@ -613,10 +814,19 @@ public class SessionHandler {
         db.dml(notificationViewdUpdate.toString());
     }
     public void addInvitedNotification(String userId, JsonObject jsonObject) throws SQLException, ClassNotFoundException {
-
-        sendToSession(sessions.get(userId), createANotification(userId, jsonObject.getString("friendId"), "invitation", "", true));
+        try {
+            sendToSession(sessions.get(userId),
+                    createANotification(userId,
+                            jsonObject.getString("friendId"),
+                            "invitation",
+                            "",
+                            true));
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres an Exception at your End, Unable perform few Operations");
+        }
     }
-    public void pingAllFriends(String userId, String message) throws SQLException, ClassNotFoundException {
+    public void pingAllFriends(String userId, String message) throws SQLException {
         StringBuilder friendList = new StringBuilder();
         friendList.append("SELECT \"FRIENDS\" FROM public.\"USERS\" WHERE \"ID\"='");
         friendList.append(userId);
@@ -642,9 +852,25 @@ public class SessionHandler {
                 }
             }
         }
-        friendListResultSet.close();
+        try {
+            friendListResultSet.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Theres an Exception while closing the ResultSet \n Retrying...");
+            try{
+                friendListResultSet.close();
+            }catch (Exception e1){
+                e1.printStackTrace();
+                System.out.println("Failed to Close The ResultSet");
+            }
+        }
     }
-    public void close(){
-        db.close();
+    public void close() {
+        try {
+            db.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Unable to Call the JDBC's Close Method ");
+        }
     }
 }

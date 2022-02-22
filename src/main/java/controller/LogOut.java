@@ -12,7 +12,6 @@ public class LogOut extends HttpServlet {
     public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
         try {
             req.getSession(false).invalidate();
-
         }catch (Exception e){
             System.out.println("There's "+ e +" while logging out the User");
         }finally {
