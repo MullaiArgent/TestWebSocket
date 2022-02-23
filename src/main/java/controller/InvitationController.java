@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Key;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
 
@@ -44,8 +45,11 @@ public class InvitationController extends HttpServlet {
                         .setSigningKey(hmacKey)
                         .build()
                         .parseClaimsJws(token);
-                //ResultSet rs = db.dql("select * from public.\"USERS\" where \"ID\" = '"+getValue(String.valueOf(jwt))+"';");
-                // TODO
+                assert db != null;
+                ResultSet rs = db.dql("select * from public.\"USERS\" where \"ID\" = '"+getValue(String.valueOf(jwt))+"';");
+                while (rs.next()){
+                    throw new IOException();
+                }
                 RequestDispatcher rd = request.getRequestDispatcher("register");
                 rd.forward(request, response);
 

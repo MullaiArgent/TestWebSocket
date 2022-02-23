@@ -30,23 +30,22 @@ public class RegisterGoogleUser extends HttpServlet {
         fullName = req.getParameter("name");
         profilePic = req.getParameter("picture");
 
+        StringBuilder insertGoogleUser = new StringBuilder();
+        insertGoogleUser.append("INSERT INTO public.\"USERS\" VALUES ('");
+        insertGoogleUser.append(userId);
+        insertGoogleUser.append("','");
+        insertGoogleUser.append(fullName);
+        insertGoogleUser.append("','");
+        insertGoogleUser.append(profilePic);
+        insertGoogleUser.append("','{}','");
+        insertGoogleUser.append(userId);
+        insertGoogleUser.append("');");
         try {
-            StringBuilder insertGoogleUser = new StringBuilder();
-            insertGoogleUser.append("INSERT INTO public.\"USERS\" VALUES ('");
-            insertGoogleUser.append(userId);
-            insertGoogleUser.append("','");
-            insertGoogleUser.append(fullName);
-            insertGoogleUser.append("','");
-            insertGoogleUser.append(profilePic);
-            insertGoogleUser.append("','{}','");
-            insertGoogleUser.append(userId);
-            insertGoogleUser.append("');");
-
             db.dml(insertGoogleUser.toString());
-
-            res.sendRedirect("app");
-        } catch (ClassNotFoundException | SQLException e) {
+        }catch (Exception e){
             e.printStackTrace();
+            System.out.println("Theres an Exception While Manipulating the Data");
         }
+        res.sendRedirect("app");
     }
 }

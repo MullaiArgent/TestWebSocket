@@ -97,7 +97,12 @@
             } else if (request.getParameter("code") != null && request.getParameter("state") != null
                     && request.getParameter("state").equals(session.getAttribute("state"))) {
 
-                JDBC db = new JDBC();
+                JDBC db = null;
+                try {
+                    db = new JDBC();
+                } catch (ClassNotFoundException | SQLException e) {
+                    e.printStackTrace();
+                }
 
                 String userinfo = helper.getUserInfoJson(request.getParameter("code"));
                 String picture = JaasSecurity.GoogleOAuth.getValues(userinfo,"picture");
@@ -106,6 +111,7 @@
                 String email = JaasSecurity.GoogleOAuth.getValues(userinfo,"email");
                 boolean createNew = true;
                 try {
+                    assert db != null;
                     ResultSet rs = db.dql("SELECT \"ID\" FROM public.\"USERS\"");
                     while (rs.next()){
                         if(rs.getString(1).equals(email)){
@@ -123,13 +129,15 @@
                         e.printStackTrace();
                     }
                 }
-                    out.println("<img src=" + picture + "style=\"position: center\" alt=" + givenName + ">");
+
+                    out.println("<img src=" + picture + "style=\"position: center\" alt=" + givenName + "hidden>");
                     out.println("<form action=\"j_security_check\" method=\"POST\">");
                     out.println("<input type=\"text\" value=\"" + email + "\" name=\"j_username\" hidden>");
                     out.println("<input type=\"password\" value=\"" + helper.getAccessToken() + "\" name= \"j_password\" hidden>");
-                    out.println("<button type=\"submit\" value =\"check\">Login in as " + givenName + " </button>");
+                    out.println("<button  type=\"submit\" value =\"check\" hidden>Login in as " + givenName + " </button>");
                     out.println("</form>");
             }
+            // TODO HTTP REQ TO SUBMIT
         %>
 </div>
 </body>

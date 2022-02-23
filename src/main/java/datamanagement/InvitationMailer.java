@@ -3,22 +3,20 @@ package datamanagement;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import sockets.SessionHandler;
-
+import javax.crypto.spec.SecretKeySpec;
+import javax.json.JsonObject;
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.security.Key;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.*;
-import javax.crypto.spec.SecretKeySpec;
-import javax.json.JsonObject;
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.mail.Session;
-import javax.servlet.http.HttpServletRequest;
+import java.util.Base64;
+import java.util.Properties;
+import java.util.UUID;
 
 public class InvitationMailer {
-    static String host = "smtp.gmail.com";
-    static String user = "mullairajan2000@gmail.com";
     String scheme;
     String serverName;
     String serverPort;

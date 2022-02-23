@@ -5,7 +5,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -22,7 +21,8 @@ import java.util.Objects;
 
 @WebServlet(urlPatterns = "/createAccount")
 public class CreateAccountController extends HttpServlet {
-
+    HttpSession session;
+    JDBC db = new JDBC();
     public CreateAccountController() throws ClassNotFoundException, SQLException {
     }
 
@@ -42,8 +42,8 @@ public class CreateAccountController extends HttpServlet {
         }
         return val.toString();
     }
-    HttpSession session;
-    JDBC db = new JDBC();
+
+    @SuppressWarnings("StringBufferReplaceableByString")
     @Override
     public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
@@ -64,7 +64,7 @@ public class CreateAccountController extends HttpServlet {
             String friendIdJwt = getValue(String.valueOf(jwt), "friendId");
             session.setAttribute("userIdJwt",userIdJwt);
             session.setAttribute("friendIdJwt",friendIdJwt);
-            ResultSet rs = null;
+            ResultSet rs;
             try {
                 StringBuilder queryNotification = new StringBuilder();
                 queryNotification.append("SELECT * FROM public.\"NOTIFICATION\" WHERE \"RECIPIENT_ID\"='");
@@ -77,7 +77,18 @@ public class CreateAccountController extends HttpServlet {
                 while (rs.next()) {
                     invited = true;
                 }
-                rs.close();
+                try {
+                    rs.close();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    System.out.println("Theres an Exception while Closing the ResultSet\n Retrying...");
+                    try{
+                        rs.close();
+                    }catch (Exception e1){
+                        e1.printStackTrace();
+                        System.out.println("Failed to Close the ResultSet");
+                    }
+                }
             } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -103,17 +114,21 @@ public class CreateAccountController extends HttpServlet {
 
                     db.dml(updateUser.toString());
                     db.dml(updateNotification.toString());
+                    db.close();
                     res.sendRedirect("app");
 
                 } catch (ClassNotFoundException | SQLException e) {
                     e.printStackTrace();
+                    db.close();
                 }
 
             } else {
+                db.close();
                 out.println("not a valid entry valid");
             }
         } else {
             addUSer(req);
+            db.close();
             res.sendRedirect("app");
         }
     }
@@ -137,37 +152,47 @@ public class CreateAccountController extends HttpServlet {
             re_password = req.getParameter("re_password");
             mail_id = req.getParameter("mail_id");
             if (password.equals(re_password)) {
+                StringBuilder insertUser = new StringBuilder();
+                insertUser.append("INSERT INTO public.\"USERS\" VALUES ('");
+                insertUser.append(userId);
+                insertUser.append("','");
+                insertUser.append(fullName);
+                insertUser.append("','");
+                insertUser.append(profilePic);
+                insertUser.append("','{");
+                insertUser.append(session.getAttribute("userIdJwt"));
+                insertUser.append("}', '");
+                insertUser.append(mail_id);
+                insertUser.append("');");
                 try {
-                    StringBuilder insertUser = new StringBuilder();
-                    insertUser.append("INSERT INTO public.\"USERS\" VALUES ('");
-                    insertUser.append(userId);
-                    insertUser.append("','");
-                    insertUser.append(fullName);
-                    insertUser.append("','");
-                    insertUser.append(profilePic);
-                    insertUser.append("','{");
-                    insertUser.append(session.getAttribute("userIdJwt"));
-                    insertUser.append("}', '");
-                    insertUser.append(mail_id);
-                    insertUser.append("');");
                     db.dml(insertUser.toString());
-
-                    StringBuilder insertUserName = new StringBuilder();
-                    insertUserName.append("INSERT INTO users VALUES ('");
-                    insertUserName.append(userId);
-                    insertUserName.append("','");
-                    insertUserName.append(password);
-                    insertUserName.append("')");
-                    db.dml(insertUserName.toString());
-
-                    StringBuilder insertUserRole = new StringBuilder();
-                    insertUserRole.append("INSERT INTO users_roles VALUES ('");
-                    insertUserRole.append(userId);
-                    insertUserRole.append("','user')");
-
-                    db.dml(insertUserRole.toString());
-                } catch (ClassNotFoundException | SQLException e) {
+                }catch (Exception e){
                     e.printStackTrace();
+                    System.out.println("Theres an Exception while Inserting the Data");
+                }
+
+                StringBuilder insertUserName = new StringBuilder();
+                insertUserName.append("INSERT INTO users VALUES ('");
+                insertUserName.append(userId);
+                insertUserName.append("','");
+                insertUserName.append(password);
+                insertUserName.append("')");
+                try {
+                    db.dml(insertUserName.toString());
+                }catch (Exception e){
+                    e.printStackTrace();
+                    System.out.println("Theres an Exception while Inserting the Data");
+                }
+
+                StringBuilder insertUserRole = new StringBuilder();
+                insertUserRole.append("INSERT INTO users_roles VALUES ('");
+                insertUserRole.append(userId);
+                insertUserRole.append("','user')");
+                try {
+                    db.dml(insertUserRole.toString());
+                }catch (Exception e){
+                    e.printStackTrace();
+                    System.out.println("Theres an Exception while Inserting the Data");
                 }
 
             }

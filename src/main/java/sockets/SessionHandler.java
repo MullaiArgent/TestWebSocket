@@ -103,6 +103,17 @@ public class SessionHandler {
             }
         }
     }
+    private String[] getAsArray(ResultSet friendListResultSet) throws SQLException {
+        assert friendListResultSet != null;
+        if (!friendListResultSet.next()) return null;
+        Array friends;
+        String[] friendsArray = new String[0];
+        if (!friendListResultSet.getString(1).equals("{}")) {
+            friends = friendListResultSet.getArray(1);
+            friendsArray = (String[]) friends.getArray();
+        }
+        return friendsArray;
+    }
     private void initialRecentChatList(Session session, String userId) {
         String profile = "";
         String active = "";
@@ -120,14 +131,11 @@ public class SessionHandler {
         try {
             while (true) {
                 assert friendListResultSet != null;
-                if (!friendListResultSet.next()) break;
-                Array friends;
-                String[] friendsArray = new String[0];
-                if (!friendListResultSet.getString(1).equals("{}")) {
-                    friends = friendListResultSet.getArray(1);
-                    friendsArray = (String[]) friends.getArray();
-
+                String[] friendsArray = getAsArray(friendListResultSet);
+                if (friendsArray == null){
+                    break;
                 }
+
                 for (String friendId : friendsArray) {
                     String profileQuery = "SELECT \"PROFILEPIC\",\"active\" FROM public.\"USERS\" WHERE \"ID\"='" + friendId + "';";
                     ResultSet profileResultSet = db.dql(profileQuery);
@@ -492,7 +500,7 @@ public class SessionHandler {
                             } else {
                                 JsonObject addMessage = createFriendRequestWindowMessage(friendId, profile);
                                 try {
-                                    sendToSession(session, addMessage); // has no friend, fd reqing
+                                    sendToSession(session, addMessage); // has no friend.
                                 }catch (Exception e){
                                     e.printStackTrace();
                                     System.out.println("Theres an Exception at your End, Unable perform few Operations");
@@ -698,7 +706,7 @@ public class SessionHandler {
                 profileResultSet2.close();
             }catch (Exception e){
                 e.printStackTrace();
-                System.out.println("Theres an Exception while Closing the ResultSetn \n Retrying...");
+                System.out.println("Theres an Exception while Closing the ResultSet \n Retrying...");
                 try{
                     profileResultSet2.close();
                 }catch (Exception e1){
@@ -764,7 +772,7 @@ public class SessionHandler {
         try{
             sendToSession(sessions.get(friendId), addMessage);
         }catch (Exception e){
-            System.out.println(friendId + "is Offile");
+            System.out.println(friendId + "is Offline");
         }
     }
     public void invitationAccepted(String userId, String friendId)  {
