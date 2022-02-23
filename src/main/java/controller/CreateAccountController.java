@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -51,7 +52,6 @@ public class CreateAccountController extends HttpServlet {
         String token = (String) session.getAttribute("invitationToken");
 
         if (token != null) {
-
             String secret = "asdfSFS34wfsdfsdfSDSD32dfsddDDerQSNCK34SOWEK5354fdgdf4";
             Key hmacKey = new SecretKeySpec(Base64.getDecoder().decode(secret), SignatureAlgorithm.HS256.getJcaName());
             Jws<Claims> jwt = Jwts.parserBuilder()
@@ -64,7 +64,7 @@ public class CreateAccountController extends HttpServlet {
             String friendIdJwt = getValue(String.valueOf(jwt), "friendId");
             session.setAttribute("userIdJwt",userIdJwt);
             session.setAttribute("friendIdJwt",friendIdJwt);
-            ResultSet rs;
+            ResultSet rs = null;
             try {
                 StringBuilder queryNotification = new StringBuilder();
                 queryNotification.append("SELECT * FROM public.\"NOTIFICATION\" WHERE \"RECIPIENT_ID\"='");
@@ -77,23 +77,15 @@ public class CreateAccountController extends HttpServlet {
                 while (rs.next()) {
                     invited = true;
                 }
-                try {
-                    rs.close();
-                }catch (Exception e){
-                    e.printStackTrace();
-                    System.out.println("Unable to Call the ResultSet \n Retrying...");
-                    try{
-                        rs.close();
-                    }catch (Exception e1){
-                        System.out.println("Failed to close the ResultSet");
-                    }
-                }
-            } catch (SQLException e) {
+                rs.close();
+            } catch (SQLException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
 
             if (invited && (friendIdJwt.equals(friendIdParameter))) {
                 addUSer(req);
+
+
                 try {
                     StringBuilder updateUser = new StringBuilder();
                     updateUser.append("UPDATE public.\"USERS\" set \"FRIENDS\" = array_append(\"FRIENDS\", '");
@@ -111,15 +103,9 @@ public class CreateAccountController extends HttpServlet {
 
                     db.dml(updateUser.toString());
                     db.dml(updateNotification.toString());
-                    try {
-                        db.close();
-                    }catch (Exception e){
-                        e.printStackTrace();
-                        System.out.println("Unable to Call the JDBC's Close Method");
-                    }
                     res.sendRedirect("app");
 
-                } catch (SQLException e) {
+                } catch (ClassNotFoundException | SQLException e) {
                     e.printStackTrace();
                 }
 
@@ -128,12 +114,6 @@ public class CreateAccountController extends HttpServlet {
             }
         } else {
             addUSer(req);
-            try {
-                db.close();
-            }catch (Exception e){
-                e.printStackTrace();
-                System.out.println("Unable to Call the JDBC's Close Method");
-            }
             res.sendRedirect("app");
         }
     }
@@ -152,6 +132,7 @@ public class CreateAccountController extends HttpServlet {
             if(Objects.equals(profilePic, "")){
                 profilePic = "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png";
             }
+            System.out.println(profilePic + "the profile ");
             password = req.getParameter("password");
             re_password = req.getParameter("re_password");
             mail_id = req.getParameter("mail_id");
@@ -185,7 +166,7 @@ public class CreateAccountController extends HttpServlet {
                     insertUserRole.append("','user')");
 
                     db.dml(insertUserRole.toString());
-                } catch (SQLException e) {
+                } catch (ClassNotFoundException | SQLException e) {
                     e.printStackTrace();
                 }
 

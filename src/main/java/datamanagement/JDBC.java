@@ -12,46 +12,25 @@ public class JDBC {
         String url = "jdbc:postgresql://localhost:5432/chat";
         this.con = DriverManager.getConnection(url, username, password);
     }
-    public ResultSet dql(String query) throws SQLException {
-        Statement st = null;
-        try {
-            st = con.createStatement();
-        }catch (Exception e){
-            System.out.println("Error While creating the query Statement");
-        }
-        assert st != null;
-        ResultSet rs = null;
-        try {
-            rs = st.executeQuery(query);
-        }catch (Exception e){
-            e.printStackTrace();
-            System.out.println("Theres is an Error while Executing the query");
-        }finally {
-            st.close();
-        }
-        return rs;
+    public ResultSet dql(String query) throws SQLException, ClassNotFoundException {
+        Statement st = con.createStatement();
+        return st.executeQuery(query);
     }
-    public void dml(String query) throws SQLException {
-        Statement st = null;
-        try {
-            st = con.createStatement();
-        }catch (Exception e){
-            System.out.println("Error While creating the query Statement");
-        }
-        assert st != null;
+    public void dml(String query) throws ClassNotFoundException, SQLException {
+        Statement st = con.createStatement();
         st.executeUpdate(query);
-        st.close();
     }
-    public void close() {
-        try{
+    public void close(){
+        try {
             con.close();
         }catch (Exception e){
-            System.out.println("Connection not Closed. \n Re-trying...");
-            try {
+            e.printStackTrace();
+            System.out.println("Theres trouble in closing the Connection \n Retrying...");
+            try{
                 con.close();
-            }catch (Exception e2){
-                System.out.println("Retry Failed. \n Connection not closed");
-                e2.printStackTrace();
+            }catch (Exception e1){
+                e1.printStackTrace();
+                System.out.println("Failed to Close the Connection");
             }
         }
     }

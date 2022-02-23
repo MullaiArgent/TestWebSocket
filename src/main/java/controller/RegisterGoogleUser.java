@@ -45,7 +45,7 @@ public class RegisterGoogleUser extends HttpServlet {
             db.dml(insertGoogleUser.toString());
 
             res.sendRedirect("app");
-        } catch (SQLException e) {
+        } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
     }
