@@ -89,7 +89,14 @@ public class WebSocketServer {
             }
             else if ("sendImage".equals(jsonObject.getString("action"))){
                 sessionHandler.sendImage(userId, jsonObject);
-            }else{
+            }
+            else if ("isTyping".equals(jsonObject.getString("action"))){
+                sessionHandler.typing(userId, jsonObject);
+            }
+            else if ("backOnline".equals(jsonObject.getString("action"))){
+                sessionHandler.typing(userId, jsonObject);
+            }
+            else{
                 System.out.println("Invalid message from the Client");
             }
         } catch (SQLException | ClassNotFoundException e) {

@@ -927,4 +927,14 @@ public class SessionHandler {
             System.out.println("Unable to Call the JDBC's Close Method ");
         }
     }
+    public void typing(String userId, JsonObject jsonObject) {
+        sendToSession(sessions.get(
+                jsonObject.getString("friendId")),
+                JsonProvider
+                        .provider()
+                        .createObjectBuilder()
+                        .add("action", jsonObject.getString("action"))
+                        .add("friendId", userId)
+                        .build());
+    }
 }

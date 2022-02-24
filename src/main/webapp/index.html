@@ -95,7 +95,7 @@
                                     </span>
                                 </div>
                                 <label>
-                                    <input id="messageToSend" type="text" class="form-control" placeholder="Enter text here...">
+                                    <input id="messageToSend" onkeydown="startedTyping()" onkeyup="setTimeout(stoppedTyping, 3000)" type="text" class="form-control" placeholder="Enter text here...">
                                 </label>
                             </div>
                         </div>

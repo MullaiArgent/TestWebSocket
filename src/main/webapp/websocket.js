@@ -7,6 +7,143 @@ let globalUserId;
 function init(){
 
 }
+function onMessage(event) {
+    const message = JSON.parse(event.data);
+    if (message.action === "userId"){
+        document.getElementById("title").innerHTML = message.userId;
+        globalUserId = message.userId;
+
+    }
+    if (message.action === "addRecentChatModel") {
+        printRecentChats(message);
+    }
+    if (message.action === "viewChat") {
+        if (message.type === "chat") {
+            printChat(message);
+        }
+        else if (message.type === "image"){
+            printImage(message);
+        }}
+    if (message.action === "notificationCount") {
+        document.getElementById("badge").innerHTML = message.notificationCount;
+    }
+    if (message.action === "addFriendWindow") {
+        const windowType = document.getElementById("forProfile");
+
+        const profile = document.createElement("img");
+        profile.setAttribute("src", message.profile);
+        profile.setAttribute("height", "100");
+        profile.setAttribute("width", "100");
+
+        windowType.appendChild(profile);
+
+        const popWindowType = document.getElementById("popWindowType");
+        popWindowType.innerHTML = "Send Friend Request to " + message.friendId;
+
+        const popWindowButton = document.getElementById("popWindowButton");
+        popWindowButton.innerHTML = "Add Friend"
+        popWindowButton.onclick = function () {
+            sendFriendRequest(message.friendId);
+            overlayOff();
+        }
+        overlayOn();
+    }
+    if (message.action === "invitationWindow") {
+        const windowType = document.getElementById("forProfile");
+
+        const profile = document.createElement("img");
+        profile.setAttribute("src", "https://tinyurl.com/2p8hr77v");
+        profile.setAttribute("height", "100");
+        profile.setAttribute("width", "100");
+
+        windowType.appendChild(profile);
+
+        const popWindowType = document.getElementById("popWindowType");
+        popWindowType.innerHTML = "Send Invitation to " + message.friendId;
+
+        const popWindowButton = document.getElementById("popWindowButton");
+        popWindowButton.innerHTML = "Invite"
+        popWindowButton.onclick = function () {
+            sendInvitation(message.friendId);
+            overlayOff();
+        }
+        overlayOn();
+    }
+    if (message.action === "chatWindow") {
+        const windowType = document.getElementById("forProfile");
+
+        const profile = document.createElement("img");
+        profile.setAttribute("src", message.profile);
+        profile.setAttribute("height", "100");
+        profile.setAttribute("width", "100");
+
+        windowType.appendChild(profile);
+
+        const popWindowType = document.getElementById("popWindowType");
+        popWindowType.innerHTML = message.friendId + "is Already a Friend";
+
+        const popWindowButton = document.getElementById("popWindowButton");
+        popWindowButton.innerHTML = "Chat"
+        popWindowButton.onclick = function () {
+            viewChat(message.friendId);
+            overlayOff();
+        }
+        overlayOn();
+    }
+    if (message.action === "alreadyInvited") {
+        const windowType = document.getElementById("forProfile");
+
+        const profile = document.createElement("img");
+        profile.setAttribute("src", "https://tinyurl.com/35zst7ft");
+        profile.setAttribute("height", "100");
+        profile.setAttribute("width", "100");
+
+        windowType.appendChild(profile);
+
+        const popWindowType = document.getElementById("popWindowType");
+        popWindowType.innerHTML = "Already Invited "  + message.friendId;
+
+        const popWindowButton = document.getElementById("popWindowButton");
+        popWindowButton.innerHTML = "Close"
+        popWindowButton.onclick = function () {
+            overlayOff();
+        }
+        overlayOn();
+    }
+    if (message.action === "newNotification") {
+        notify()
+        console.log("comes here")
+        const badge = document.getElementById("badge");
+        badge.innerHTML = parseInt(badge.innerHTML) + 1;
+    }
+    if (message.action === "addNotification") {
+        printNotification(message);
+    }
+    if (message.action === "removeNotification"){
+        removeNotification(message);
+    }
+    if (message.action === "backOnline"){
+        document.getElementById("status"+message.friendId).innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + "online";
+        const aboutStatus = document.getElementById("aboutStatus"+message.friendId)
+        if (aboutStatus !== null) {
+            aboutStatus.innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + "online";
+        }
+    }
+    if (message.action === "wentOffline"){
+        document.getElementById("status"+message.friendId).innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + "offline";
+        const aboutStatus = document.getElementById("aboutStatus"+message.friendId);
+        if (aboutStatus !== null) {
+            aboutStatus.innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + "offline";
+        }
+    }
+    if (message.action === "isTyping"){
+        document.getElementById("status"+message.friendId).innerHTML = "<div class=\"typing\">Typing...</div>";
+        const aboutStatus = document.getElementById("aboutStatus"+message.friendId);
+        if (aboutStatus !== null) {
+            aboutStatus.innerHTML = "<div class=\"typing\">Typing...</div>";
+        }
+    }
+}
 function printRecentChats(recentChat){
 
     const recentChatsUl = document.getElementById("recentChatsUl");
@@ -198,137 +335,6 @@ function removeChat(){
     const chatList = document.getElementById("chatList")
     chatList.innerHTML = "";
 }
-function onMessage(event) {
-    const message = JSON.parse(event.data);
-    if (message.action === "userId"){
-        document.getElementById("title").innerHTML = message.userId;
-        globalUserId = message.userId;
-
-    }
-    if (message.action === "addRecentChatModel") {
-        printRecentChats(message);
-    }
-    if (message.action === "viewChat") {
-        if (message.type === "chat") {
-            printChat(message);
-        }
-        else if (message.type === "image"){
-            printImage(message);
-        }}
-    if (message.action === "notificationCount") {
-        document.getElementById("badge").innerHTML = message.notificationCount;
-    }
-    if (message.action === "addFriendWindow") {
-        const windowType = document.getElementById("forProfile");
-
-        const profile = document.createElement("img");
-        profile.setAttribute("src", message.profile);
-        profile.setAttribute("height", "100");
-        profile.setAttribute("width", "100");
-
-        windowType.appendChild(profile);
-
-        const popWindowType = document.getElementById("popWindowType");
-        popWindowType.innerHTML = "Send Friend Request to " + message.friendId;
-
-        const popWindowButton = document.getElementById("popWindowButton");
-        popWindowButton.innerHTML = "Add Friend"
-        popWindowButton.onclick = function () {
-            sendFriendRequest(message.friendId);
-            overlayOff();
-        }
-        overlayOn();
-    }
-    if (message.action === "invitationWindow") {
-        const windowType = document.getElementById("forProfile");
-
-        const profile = document.createElement("img");
-        profile.setAttribute("src", "https://tinyurl.com/2p8hr77v");
-        profile.setAttribute("height", "100");
-        profile.setAttribute("width", "100");
-
-        windowType.appendChild(profile);
-
-        const popWindowType = document.getElementById("popWindowType");
-        popWindowType.innerHTML = "Send Invitation to " + message.friendId;
-
-        const popWindowButton = document.getElementById("popWindowButton");
-        popWindowButton.innerHTML = "Invite"
-        popWindowButton.onclick = function () {
-            sendInvitation(message.friendId);
-            overlayOff();
-        }
-        overlayOn();
-    }
-    if (message.action === "chatWindow") {
-        const windowType = document.getElementById("forProfile");
-
-        const profile = document.createElement("img");
-        profile.setAttribute("src", message.profile);
-        profile.setAttribute("height", "100");
-        profile.setAttribute("width", "100");
-
-        windowType.appendChild(profile);
-
-        const popWindowType = document.getElementById("popWindowType");
-        popWindowType.innerHTML = message.friendId + "is Already a Friend";
-
-        const popWindowButton = document.getElementById("popWindowButton");
-        popWindowButton.innerHTML = "Chat"
-        popWindowButton.onclick = function () {
-            viewChat(message.friendId);
-            overlayOff();
-        }
-        overlayOn();
-    }
-    if (message.action === "alreadyInvited") {
-        const windowType = document.getElementById("forProfile");
-
-        const profile = document.createElement("img");
-        profile.setAttribute("src", "https://tinyurl.com/35zst7ft");
-        profile.setAttribute("height", "100");
-        profile.setAttribute("width", "100");
-
-        windowType.appendChild(profile);
-
-        const popWindowType = document.getElementById("popWindowType");
-        popWindowType.innerHTML = "Already Invited "  + message.friendId;
-
-        const popWindowButton = document.getElementById("popWindowButton");
-        popWindowButton.innerHTML = "Close"
-        popWindowButton.onclick = function () {
-            overlayOff();
-        }
-        overlayOn();
-    }
-    if (message.action === "newNotification") {
-        notify()
-        console.log("comes here")
-        const badge = document.getElementById("badge");
-        badge.innerHTML = parseInt(badge.innerHTML) + 1;
-    }
-    if (message.action === "addNotification") {
-        printNotification(message);
-    }
-    if (message.action === "removeNotification"){
-        removeNotification(message);
-    }
-    if (message.action === "backOnline"){
-        document.getElementById("status"+message.friendId).innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + "online";
-
-        const aboutStatus = document.getElementById("aboutStatus"+message.friendId)
-        if (aboutStatus !== null) {
-        aboutStatus.innerHTML = "<i class=\"fa fa-circle online\"></i>&nbsp" + "online";
-        }
-    }
-    if (message.action === "wentOffline"){
-        document.getElementById("status"+message.friendId).innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + "offline";
-        const aboutStatus = document.getElementById("aboutStatus"+message.friendId);
-        if (aboutStatus !== null) {
-            aboutStatus.innerHTML = "<i class=\"fa fa-circle offline\"></i>&nbsp" + "offline";
-        }
-    }
-}
 function removeLabel(){
     document.getElementById("about").innerHTML = ""
 }
@@ -465,4 +471,16 @@ function sendImage(item) {
 }
 function notify(){
     document.getElementById("notificationAudio").play();
+}
+function startedTyping(){
+    socket.send(JSON.stringify({
+        action : "isTyping",
+        friendId : globalFriendId
+    }))
+}
+function stoppedTyping(){
+    socket.send(JSON.stringify({
+        action : "backOnline",
+        friendId : globalFriendId
+    }))
 }
