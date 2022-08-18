@@ -18,7 +18,6 @@ public class AppController extends HttpServlet {
         session.setAttribute("scheme",req.getScheme());
         session.setAttribute("serverName",req.getServerName());
         session.setAttribute("serverPort",req.getServerPort()+"");
-
         RequestDispatcher rd = req.getRequestDispatcher("index.html");
         rd.forward(req, res);
     }
